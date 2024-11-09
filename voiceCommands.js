@@ -16,12 +16,18 @@ const pushToTalkButton = document.getElementById('pushToTalk');
 pushToTalkButton.addEventListener('mousedown', () => {
     if (!isRecognitionActive) {
         recognition.start();
+        pushToTalkButton.textContent = 'Listening...'; // Change text to "Listening..."
+        pushToTalkButton.classList.remove('inactive');
+        pushToTalkButton.classList.add('active');
     }
 });
 
 pushToTalkButton.addEventListener('mouseup', () => {
     if (isRecognitionActive) {
         recognition.stop();
+        pushToTalkButton.textContent = 'Push to Talk'; // Revert text
+        pushToTalkButton.classList.remove('active');
+        pushToTalkButton.classList.add('inactive');
     }
 });
 
@@ -29,6 +35,9 @@ pushToTalkButton.addEventListener('touchstart', (event) => {
     event.preventDefault(); // Prevent default behavior for mobile
     if (!isRecognitionActive) {
         recognition.start();
+        pushToTalkButton.textContent = 'Listening...';
+        pushToTalkButton.classList.remove('inactive');
+        pushToTalkButton.classList.add('active');
     }
 });
 
@@ -36,6 +45,9 @@ pushToTalkButton.addEventListener('touchend', (event) => {
     event.preventDefault(); // Prevent default behavior for mobile
     if (isRecognitionActive) {
         recognition.stop();
+        pushToTalkButton.textContent = 'Push to Talk';
+        pushToTalkButton.classList.remove('active');
+        pushToTalkButton.classList.add('inactive');
     }
 });
 
@@ -48,6 +60,10 @@ recognition.onstart = () => {
 recognition.onend = () => {
     console.log('Speech recognition ended');
     isRecognitionActive = false;
+    // Ensure button state reverts if speech recognition ends unexpectedly
+    pushToTalkButton.textContent = 'Push to Talk';
+    pushToTalkButton.classList.remove('active');
+    pushToTalkButton.classList.add('inactive');
 };
 
 
