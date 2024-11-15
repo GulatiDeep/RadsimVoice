@@ -183,7 +183,7 @@ html {
 
 /* Individual rings on the radar */
 .ring {
-    border: 0.2px dotted gray;
+    border: 0.2px solid gray;
     border-radius: 100%;
     position: absolute;
 }
@@ -251,7 +251,7 @@ html {
 /* Direction line in radar */
 .direction-line {
     background-color: white;
-    opacity: 0.5;
+    opacity: 0.75;
 }
 
 

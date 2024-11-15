@@ -1,115 +1,7 @@
-//Commands
 
-// Initialize the SpeechRecognition API
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-recognition.continuous = true; // Keep recognizing as long as the user is speaking
-recognition.interimResults = false; // Don't show intermediate results
-//const activateSpeech = document.getElementById('activateSpeech');
+/*******Voice Commands handling */
 
-// Track if speech recognition is running
-let isRecognitionActive = false;
-
-// Reference to the button
-const pushToTalkButton = document.getElementById('pushToTalk');
-
-// Event listeners for starting and stopping recognition based on button interaction
-pushToTalkButton.addEventListener('mousedown', () => {
-    if (!isRecognitionActive) {
-        recognition.start();
-        pushToTalkButton.textContent = 'Listening...'; // Change text to "Listening..."
-        pushToTalkButton.classList.remove('inactive');
-        pushToTalkButton.classList.add('active');
-    }
-});
-
-pushToTalkButton.addEventListener('mouseup', () => {
-    if (isRecognitionActive) {
-        recognition.stop();
-        pushToTalkButton.textContent = 'Push to Talk'; // Revert text
-        pushToTalkButton.classList.remove('active');
-        pushToTalkButton.classList.add('inactive');
-    }
-});
-
-pushToTalkButton.addEventListener('touchstart', (event) => {
-    event.preventDefault(); // Prevent default behavior for mobile
-    if (!isRecognitionActive) {
-        recognition.start();
-        pushToTalkButton.textContent = 'Listening...';
-        pushToTalkButton.classList.remove('inactive');
-        pushToTalkButton.classList.add('active');
-    }
-});
-
-pushToTalkButton.addEventListener('touchend', (event) => {
-    event.preventDefault(); // Prevent default behavior for mobile
-    if (isRecognitionActive) {
-        recognition.stop();
-        pushToTalkButton.textContent = 'Push to Talk';
-        pushToTalkButton.classList.remove('active');
-        pushToTalkButton.classList.add('inactive');
-    }
-});
-
-// Update existing event handlers to ensure recognition state is correctly tracked
-recognition.onstart = () => {
-    console.log('Speech recognition started');
-    isRecognitionActive = true;
-};
-
-recognition.onend = () => {
-    console.log('Speech recognition ended');
-    isRecognitionActive = false;
-    // Ensure button state reverts if speech recognition ends unexpectedly
-    pushToTalkButton.textContent = 'Push to Talk';
-    pushToTalkButton.classList.remove('active');
-    pushToTalkButton.classList.add('inactive');
-};
-
-
-
-// Event handler for when speech is recognized
-recognition.onresult = (event) => {
-    const results = event.results;
-    const voiceCommand = results[results.length - 1][0].transcript.toLowerCase().trim();
-    console.log('Controller: ' + voiceCommand);
-    updateStatusBar('Radar: ' + voiceCommand);
-
-    // Handle the recognized command
-    handleVoiceCommand(voiceCommand);
-};
-
-// Event handler for errors
-recognition.onerror = (event) => {
-    console.error('Speech recognition error:', event.error);
-    restartRecognition(); // Restart recognition on error
-};
-
-
-
-/********Code for Speech Synthesis */
-// Flag to track if speech synthesis has been activated
-let speechActivated = true;
-
-// Function to speak out a message
-function speak(text) {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // Clear any ongoing speech
-        const speech = new SpeechSynthesisUtterance(text);
-        speech.lang = 'en-US';
-        window.speechSynthesis.speak(speech);
-    } else {
-        console.warn('Speech synthesis not supported in this browser.');
-    }
-}
-
-// Activate speech synthesis on button click
-document.getElementById('activateSpeech').addEventListener('click', () => {
-    speechActivated = true;
-    speak('Speech synthesis activated.');
-    document.getElementById('activateSpeech').style.display = 'none'; // Hide button after activation
-});
-
+// Function to handle voice command
 
 // Function to handle voice command
 function handleVoiceCommand(command) {
@@ -119,51 +11,112 @@ function handleVoiceCommand(command) {
     }
 
     // Normalize command and trim spaces
-    const normalizedCommand = command.toLowerCase().trim();
+    const normalizedCommand = normalizeCommand(command.toLowerCase().trim());
     console.log('Normalized Voice command:', normalizedCommand);
 
-    // Extract heading if present
-    const headingMatch = normalizedCommand.match(/turn right heading (\d{3})/);
-    const heading = headingMatch ? headingMatch[1] : null;
+    // Regex to extract the base callsign, number (if present), and command
+    const match = normalizedCommand.match(/^(\w+)(?:\s+(\d+))?\s+(.*)$/);
 
+    if (match) {
+        let callsign = match[1];
+        const number = match[2]; // Extract number if present (e.g., '1' in 'Cola 1')
+        const userCommand = match[3]; // Remaining part of the command
 
-    if (normalizedCommand.includes('turn right heading') && heading) {
-        const message = `Roger, Turning Right Heading ${heading}`;
-        speak(message);
-        updateStatusBar('Pilot: ' + message);
+        // Normalize the callsign for consistency (e.g., mapping 'kola' to 'cola' if needed)
+        callsign = normalizeCallsign(callsign);
+        console.log(`Identified base callsign: ${callsign}`);
 
-        // Find the target aircraft (e.g., the lead blip in a formation or a specific aircraft)
-        // For simplicity, let's assume you're using the first blip in the list for demonstration
-        const targetBlip = aircraftBlips[0]; // Adjust selection logic as needed
-
-        if (targetBlip) {
-            // Construct the command string to match the input style of commands.js (e.g., "R123" for "Turn Right Heading 123")
-            const voiceCommand = `R${heading}`;
-            processCommandForBlip(targetBlip, voiceCommand); // Call function from commands.js
+        // Check if a number is specified (e.g., 'Cola 1')
+        if (number) {
+            // Handle individual member of the formation
+            const memberCallsign = `${callsign}-${number}`;
+            console.log(`Identified specific formation member: ${memberCallsign}`);
+            // Here, proceed with issuing the command to the specific formation member
         } else {
-            updateStatusBar('No target aircraft found.');
+            // Handle the base callsign (e.g., 'Cola') for the whole formation
+            console.log(`Identified base callsign for formation: ${callsign}`);
+            // Here, you can handle command propagation to all formation members
         }
-    } 
-    else {
-        speak('Say again');
-        updateStatusBar('Pilot: Say Again');
-    }
 
+    } else {
+        console.warn('Failed to match voice command structure:', command);
+    }
 }
 
 
+// Normalize to handle common mispronunciations
+function normalizeCommand(command) {
+    // Replace common misrecognitions
+    const replacements = {
+        'handing': 'heading',
+        'into': 'heading', // Replacing into  as heading
+        'in': 'heading' // replacing in as heading
+    };
+    for (let [incorrect, correct] of Object.entries(replacements)) {
+        command = command.replace(new RegExp(`\\b${incorrect}\\b`, 'g'), correct);
+    }
+    return command.trim();
+}
 
 
-// Function to activate speech synthesis
-//document.getElementById('activateSpeech').addEventListener('click', () => {
-    //speechActivated = true;
-    //document.getElementById('activateSpeech').style.display = 'none'; // Hide the button after activation
-//});
+function normalizeCallsign(callsign) {
+    // Map for known airline prefixes
+    const airlineMap = {
+        'air india': 'AI',
+        'indigo': 'IGO',
+        'spicejet': 'SJ',
+        // Add more airlines as needed
+    };
 
+    // Map for phonetic alphabet to single-letter conversions
+    const phoneticMap = {
+        'alpha': 'A', 'bravo': 'B', 'charlie': 'C', 'delta': 'D', 'echo': 'E',
+        'foxtrot': 'F', 'golf': 'G', 'hotel': 'H', 'india': 'I', 'juliett': 'J',
+        'kilo': 'K', 'lima': 'L', 'mike': 'M', 'november': 'N', 'oscar': 'O',
+        'papa': 'P', 'quebec': 'Q', 'romeo': 'R', 'sierra': 'S', 'tango': 'T',
+        'uniform': 'U', 'victor': 'V', 'whiskey': 'W', 'x-ray': 'X', 'yankee': 'Y', 'zulu': 'Z'
+    };
 
-//activateSpeech.addEventListener('click', () => {
-    //speechActivated = true;
-    //startButton.style.display = 'none'; // Hide the button after interaction
-    //startVoiceRecognition();
-    
-//});
+    // Normalize input callsign to lowercase and trim whitespace
+    let normalized = callsign.toLowerCase().trim();
+
+    // Handle formation callsigns (e.g., "Cola 1" -> "Cola-1")
+    const formationMatch = normalized.match(/^(\w+)\s*(\d)$/);
+    if (formationMatch) {
+        const baseCallsign = formationMatch[1];
+        const number = formationMatch[2];
+        if (number >= '1' && number <= '4') {
+            return `${baseCallsign.toUpperCase()}-${number}`;
+        }
+    }
+
+    // Handle airline callsigns with numeric identifier (e.g., "Air India 320" -> "AI320")
+    for (const [airlineName, airlineCode] of Object.entries(airlineMap)) {
+        if (normalized.startsWith(airlineName)) {
+            const numberMatch = normalized.match(/\d+$/); // Capture trailing number, if present
+            return airlineCode + (numberMatch ? numberMatch[0] : '');
+        }
+    }
+
+    // Handle phonetic-based callsigns (e.g., "Victory Charlie Golf" -> "VCG")
+    const words = normalized.split(/\s+/);
+    let result = '';
+    let allPhonetic = true;
+
+    for (const word of words) {
+        if (phoneticMap[word]) {
+            result += phoneticMap[word];
+        } else {
+            allPhonetic = false;
+            result += word; // If it's not in the phonetic map, keep as-is
+        }
+    }
+
+    // If all words are phonetic letters, return the compressed result
+    if (allPhonetic) {
+        return result.toUpperCase();
+    }
+
+    return callsign.toUpperCase(); // Default to returning the original callsign in uppercase if no match
+}
+

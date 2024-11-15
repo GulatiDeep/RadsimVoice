@@ -1,6 +1,12 @@
+
 //********eventListeners.js script file starts here**********/
 
     //All event listeners placed here
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Automatically open the aircraft creation dialog when the page loads
+        openAircraftDialog();
+    });
 
 
     // Context menu for creating aircraft
@@ -55,56 +61,7 @@
         }
     });
 
-    // Event listener to update SSR input fields based on formation size
-    document.querySelectorAll('input[name="formationSize"]').forEach(radio => {
-        radio.addEventListener('change', () => {
-            const formationSize = document.querySelector('input[name="formationSize"]:checked').value;
-            const callsign = document.getElementById('callsignInput').value.trim();  // Get callsign input
-            const ssrFormationContainer = document.getElementById('ssrFormationContainer');
-            const singleSSRInput = document.getElementById('singleSSRInput');
-            const formationSSRInputs = document.getElementById('formationSSRInputs');
-            const isValidFormationCallsign = /^[A-Za-z]+$/.test(callsign);
-
-            // Check if callsign is entered before proceeding
-            if (!callsign) {
-                alert("Please enter a valid callsign before selecting the formation size.");
-                document.querySelector('input[name="formationSize"][value="1"]').checked = true;  // Reset to single aircraft
-                return;
-            }
-
-            //Check whether the entered callsign is string or a number
-            if (!isValidFormationCallsign) {
-                callsignInput.style.backgroundColor = '#f8d7da';  // Light red color
-                alert("Formation callsign can't contain numbers or special characters.");
-                document.querySelector('input[name="formationSize"][value="1"]').checked = true;  // Reset to single aircraft
-                return;
-            } else {
-                callsignInput.style.backgroundColor = '';  // Reset to default
-
-            }
-
-            if (formationSize == 1) {
-                // Show the single SSR input for individual aircraft
-                singleSSRInput.style.display = 'block';
-                formationSSRInputs.style.display = 'none';
-            } else {
-                // Hide the single SSR input and generate multiple SSR input fields with callsign-formation format
-                singleSSRInput.style.display = 'none';
-                formationSSRInputs.style.display = 'block';
-                ssrFormationContainer.innerHTML = '';  // Clear previous inputs
-
-                for (let i = 1; i <= formationSize; i++) {
-                    ssrFormationContainer.innerHTML += `
-                    <div class="ssr-input-container">
-                        <input type="number" class="formation-ssr-input" style="margin-bottom:1px" id="formationSSRInput_${i}" min="0000" max="7777" placeholder="${callsign}-${i} " required>
-                    </div>
-                `;
-                }
-            }
-        });
-    });
-
-
+    
 
     //Event listener to Toggle the visibility of labels and update the button's appearance
     document.getElementById('label').addEventListener('click', () => {

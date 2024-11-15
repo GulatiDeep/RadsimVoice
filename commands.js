@@ -31,7 +31,7 @@ function propagateCommandToFormation(leaderBlip, command) {
     const baseCallsign = getBaseCallsign(leaderBlip.callsign);
     const formationSize = leaderBlip.formationSize;  // Get the formation size from the leader
 
-    //console.log(`Base Callsign: ${baseCallsign}, Formation Size: ${formationSize}`);
+    console.log(`Base Callsign: ${baseCallsign}, Formation Size: ${formationSize}`);
 
     // Loop backwards from the last aircraft in the formation to the first (including the leader)
     for (let i = 1; i <= 4; i++) {
@@ -70,6 +70,9 @@ function processCommandForBlip(blip, command) {
         const turnDirection = direction === 'L' ? 'Left' : 'Right';
         updateStatusBar(`Aircraft ${blip.callsign} turning ${turnDirection} heading ${blip.targetHeading}°`);
         isValidCommand = true;
+        const voiceHeading = pronounceHeading(blip.targetHeading);
+        const voiceCallsign = pronounceCallsign(blip.callsign);
+        speak(`${voiceCallsign} Turning ${turnDirection} Heading ${voiceHeading}`);
     }
 
     // Handle speed command
@@ -78,6 +81,8 @@ function processCommandForBlip(blip, command) {
         blip.setTargetSpeed(speed);
         updateStatusBar(`Aircraft ${blip.callsign} speed set to ${speed} knots.`);
         isValidCommand = true;
+        const voiceCallsign = pronounceCallsign(blip.callsign);
+        speak(` Setting speed to ${speed} knots ${voiceCallsign}`);
     }
 
     // Handle altitude command
@@ -86,6 +91,8 @@ function processCommandForBlip(blip, command) {
         blip.targetAltitude = altitude;
         updateStatusBar(`Aircraft ${blip.callsign} target altitude set to ${altitude} feet.`);
         isValidCommand = true;
+        const voiceCallsign = pronounceCallsign(blip.callsign);
+        speak(` Setting altitude to ${altitude} feet ${voiceCallsign}`);
     }
 
     // Handle vertical rate command
@@ -94,6 +101,8 @@ function processCommandForBlip(blip, command) {
         blip.verticalClimbDescendRate = rate;
         updateStatusBar(`Aircraft ${blip.callsign} vertical rate set to ${rate} feet per minute.`);
         isValidCommand = true;
+        const voiceCallsign = pronounceCallsign(blip.callsign);
+        speak(` Changing Vertical Rate of Climb to ${rate} feet per minute ${voiceCallsign}`);
     }
 
     // Handle SSR code command
@@ -104,12 +113,18 @@ function processCommandForBlip(blip, command) {
             const existingSSR = aircraftBlips.find(b => b.ssrCode === newSSRCode);
             if (existingSSR && newSSRCode !== '0000') {
                 updateStatusBar(`Duplicate SSR code. Aircraft ${existingSSR.callsign} already squawking ${existingSSR.ssrCode}`);
+                //const voiceCallsign = pronounceCallsign(existingSSR.callsign);
+                //const voiceSSR = pronounce(existingSSR.ssrCode);
+                //speak(`Duplicate SSR code. ${voiceCallsign} already squawking ${voiceSSR}`);
                 return;
             }
         }
 
         blip.setSSRCode(newSSRCode);
         updateStatusBar(`Aircraft ${blip.callsign} SSR code set to 3-${newSSRCode}`);
+        //const voiceCallsign = pronounceCallsign(blip.callsign);
+        //const voiceSSR = pronounce(newSSRCode);
+        //speak(`Squawking ${voiceSSR},${voiceCallsign}` );
         isValidCommand = true;
     }
 
@@ -118,6 +133,9 @@ function processCommandForBlip(blip, command) {
         const formattedHeading = String(Math.round(blip.heading) % 360).padStart(3, '0');
         updateStatusBar(`Aircraft ${blip.callsign} heading: ${formattedHeading}°`);
         isValidCommand = true;
+        const voiceHeading = pronounceHeading(formattedHeading);
+        const voiceCallsign = pronounceCallsign(blip.callsign);
+        speak(`${voiceCallsign}  Heading ${voiceHeading}`);
     }
 
     // Handle delete command
@@ -125,7 +143,7 @@ function processCommandForBlip(blip, command) {
         deleteAircraft(blip);
         updateStatusBar(`Aircraft ${blip.callsign} deleted.`);
         isValidCommand = true;
-        
+
     }
 
     // Handle orbit left command
@@ -133,6 +151,8 @@ function processCommandForBlip(blip, command) {
         blip.startOrbitLeft();
         updateStatusBar(`Aircraft ${blip.callsign} orbiting left.`);
         isValidCommand = true;
+        const voiceCallsign = pronounceCallsign(blip.callsign);
+        speak(` Orbiting Left ${voiceCallsign}`);
     }
 
     // Handle orbit right command
@@ -140,13 +160,19 @@ function processCommandForBlip(blip, command) {
         blip.startOrbitRight();
         updateStatusBar(`Aircraft ${blip.callsign} orbiting right.`);
         isValidCommand = true;
+        const voiceCallsign = pronounceCallsign(blip.callsign);
+        speak(` Orbiting Right ${voiceCallsign}`);
     }
 
     // Handle stop turn command
     else if (command === "ST") {
         blip.stopTurn();
-        updateStatusBar(`Aircraft ${blip.callsign} stopping turn.`);
+        const formattedHeading = String(Math.round(blip.heading) % 360).padStart(3, '0');
+        updateStatusBar(`Aircraft ${blip.callsign} stopping turn heading: ${formattedHeading}°.`);
         isValidCommand = true;
+        const voiceHeading = pronounceHeading(formattedHeading);
+        const voiceCallsign = pronounceCallsign(blip.callsign);
+        speak(`${voiceCallsign} Stopping Turn Heading ${voiceHeading}`);
     }
 
     // Handle invalid command
@@ -160,8 +186,92 @@ function processCommandForBlip(blip, command) {
         lastCommandDisplay.textContent = `${command}`;
         lastCommandDisplay.style.backgroundColor = isValidCommand ? 'lightgreen' : 'lightcoral'; // Green for valid, red for invalid
     }
-    
+
+}
+
+/****Speaking Commands *******/
+/****Functions to pronounce callsign and heading for acknowledgement of commands */
+function pronounceCallsign(callsign) {
+    const phoneticAlphabet = {
+        'A': 'Alpha', 'B': 'Bravo', 'C': 'Charlie', 'D': 'Delta', 'E': 'Echo', 'F': 'Foxtrot', 'G': 'Golf',
+        'H': 'Hotel', 'I': 'India', 'J': 'Juliett', 'K': 'Kilo', 'L': 'Lima', 'M': 'Mike', 'N': 'November',
+        'O': 'Oscar', 'P': 'Papa', 'Q': 'Quebec', 'R': 'Romeo', 'S': 'Sierra', 'T': 'Tango', 'U': 'Uniform',
+        'V': 'Victor', 'W': 'Whiskey', 'X': 'X-ray', 'Y': 'Yankee', 'Z': 'Zulu',
+        '0': 'Zero', '1': 'One', '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven',
+        '8': 'Eight', '9': 'Nine'
+    };
+
+    // Define a mapping for airline abbreviations
+    const airlineNames = {
+        'AI': 'Air India',
+        'IGO': 'Indigo',
+        'EK': 'Emirates',
+        'BA': 'British Airways',
+        'AA': 'American Airlines',
+        'DL': 'Delta Airlines'
+        // Add more as needed
+    };
+
+    // Define a mapping for formation callsigns (names like "Cola", "Limca", "Thunder")
+    const formationNames = ['Cola', 'Limca', 'Thunder']; // Add more formation names here if needed
+
+    // Check if the callsign starts with a known airline abbreviation
+    const callsignUpper = callsign.toUpperCase();
+    let airlinePrefix = '';
+    let remainingCallsign = callsign;
+
+    // Check if the first two or three characters match an airline abbreviation
+    if (airlineNames[callsignUpper.slice(0, 3)]) {
+        airlinePrefix = airlineNames[callsignUpper.slice(0, 3)];
+        remainingCallsign = callsign.slice(3);
+    } else if (airlineNames[callsignUpper.slice(0, 2)]) {
+        airlinePrefix = airlineNames[callsignUpper.slice(0, 2)];
+        remainingCallsign = callsign.slice(2);
+    }
+
+    // If an airline prefix is found, handle it
+    if (airlinePrefix) {
+        return airlinePrefix + ' ' + remainingCallsign
+            .split('')
+            .map(char => phoneticAlphabet[char.toUpperCase()] || phoneticAlphabet[char] || char) // Convert remaining letters and digits
+            .join(' ');
+    }
+
+    // Check if the callsign is a formation name (like "Cola", "Limca", "Thunder")
+    if (formationNames.includes(callsignUpper)) {
+        return callsign + ' ' + remainingCallsign
+            .split('-')[1] // Get the number part after the '-'
+            .split('')
+            .map(char => phoneticAlphabet[char] || char) // Convert digits to phonetic alphabet
+            .join(' ');
+    }
+
+    // If no airline name or formation name is found, proceed with phonetic conversion for the entire callsign
+    return callsign
+        .split('')
+        .map(char => phoneticAlphabet[char.toUpperCase()] || phoneticAlphabet[char] || char) // Convert letters and digits
+        .join(' ');
 }
 
 
+function pronounceHeading(heading) {
+    const formattedHeading = formatHeading(heading);
+    return formattedHeading
+        .split('')
+        .map(digit => ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'][parseInt(digit)])
+        .join(' ');
+}
+
+function pronounce(number) {
+    return number
+        .split('')
+        .map(digit => ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'][parseInt(digit)])
+        .join(' ');
+}
+
+function formatHeading(heading) {
+    // Ensures the heading is a 3-digit string (e.g., "005" instead of "5")
+    return String(heading).padStart(3, '0');
+}
 //********commands.js script file ends here**********/
+
