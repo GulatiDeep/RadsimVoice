@@ -266,10 +266,11 @@ function createIndividualAircraft(num) {
         if (!callsign) return false;  // Stop creation if any error occurs
 
         const position = getRandomPosition();
+        const heading = getRandomHeading();
         const speed = 300;
         const altitude = getRandomAltitude(6000, 10000);
 
-        const blip = new AircraftBlip(callsign, position.firstHeading, speed, altitude, position.x, position.y, '0000');
+        const blip = new AircraftBlip(callsign, heading, speed, altitude, position.x, position.y, '0000');
         blip.role = 'Individual';
         aircraftBlips.push(blip);
 
@@ -281,6 +282,9 @@ function createIndividualAircraft(num) {
     displayAircraftCounts();
     return true;
 }
+function getRandomHeading() {
+    return Math.floor(Math.random() * 36) * 10;  // Generates multiples of 10 from 0 to 350
+}
 
 // Function to create aircraft blip for transport aircraft
 function createTransportAircraft(num) {
@@ -289,11 +293,12 @@ function createTransportAircraft(num) {
         if (!callsign) return false;  // Stop creation if any error occurs
 
         const position = getRandomPosition();
+        const heading = getRandomHeading();
         const ssrCode = getRandomSSRCode();
         const speed = 250;
         const altitude = getRandomAltitude(6000, 10000);
 
-        const blip = new AircraftBlip(callsign, position.firstHeading, speed, altitude, position.x, position.y, ssrCode);
+        const blip = new AircraftBlip(callsign, heading, speed, altitude, position.x, position.y, ssrCode);
         blip.role = 'Individual';
         aircraftBlips.push(blip);
 
@@ -313,13 +318,14 @@ function createFormationAircraft(num, formationSize) {
         if (!formationCallsign) return false;  // Stop creation if any error occurs
         
         const position = getRandomPosition();
+        const heading = getRandomHeading();
         const speed = 300;
         const altitude = getRandomAltitude(6000, 10000);
 
         // Create all members of the formation
         for (let j = formationSize; j >= 1; j--) {
             const callsign = `${formationCallsign}-${j}`;
-            const blip = new AircraftBlip(callsign, position.firstHeading, speed, altitude, position.x, position.y, '0000');
+            const blip = new AircraftBlip(callsign, heading, speed, altitude, position.x, position.y, '0000');
             blip.role = (j === 1) ? 'Leader' : 'Member';
 
             // Store the formation size in the blip
@@ -350,30 +356,21 @@ function createFormationAircraft(num, formationSize) {
 let previousPositions = [];
 
 function getRandomPosition() {
-    let distance, heading, x, y, bearing, firstHeading;
+    let distance, heading, x, y;
     let isValidPosition = false;
 
     // Repeat the process until a valid position (at least 10-20 nautical miles apart) is found
     while (!isValidPosition) {
-        // Random distance between 20 and 60 nautical miles
-        distance = Math.random() * (60 - 30) + 30;
+        // Random distance between 30 and 50 nautical miles
+        distance = Math.random() * (55 - 30) + 30;
 
         // Random heading between 0 and 360 degrees
         heading = Math.random() * 360;
 
-        // Convert polar coordinates (distance, heading) to Cartesian coordinates (x, y)
+        // Convert polar coordinates (distance, heading) to cartesian coordinates (x, y)
         x = distance * Math.cos(heading * Math.PI / 180); // x is the distance projected along the x-axis
         y = distance * Math.sin(heading * Math.PI / 180); // y is the distance projected along the y-axis
 
-        // Calculate the bearing from the radar center
-        bearing = Math.atan2(x, y) * (180 / Math.PI);
-        bearing = (bearing + 360) % 360; // Normalize to 0-360 degrees
-
-        // Calculate the opposite heading (180 degrees from the bearing)
-        firstHeading = (bearing + 180) % 360;
-        // Format heading to always be 3 digits (no decimals)
-        firstHeading = String(Math.round(firstHeading) % 360).padStart(3, '0');
-        
         // Check if the new position is at least 10-20 nautical miles away from any previous position
         isValidPosition = true;
         for (let pos of previousPositions) {
@@ -392,9 +389,10 @@ function getRandomPosition() {
     // Store the new position
     previousPositions.push({ x, y });
 
-    // Return the valid position along with the calculated heading
-    return { x, y, firstHeading };
+    // Return the valid position
+    return { x, y };
 }
+
 
 function getRandomPosition1() {
     let distance, heading, x, y;
