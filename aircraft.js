@@ -1,4 +1,3 @@
-
 //********aircraft.js script file starts here**********/
 
 //*****All variables and constants regarding aircraft handling and movmement of aircraft */
@@ -21,10 +20,7 @@ let allAircraftCallsigns = []; //to initialise the list of callsigns array
 // Initialize counters for number of aircraft
 let totalAircraftCount = 0;  // Count of all aircraft, including individual, transport, and formation members
 
-let aircraftCountDisplay = null;
-
-// A list to store previously generated positions of newly created aircraft
-//let previousPositions = [];
+let aircraftCountDisplay= null;
 
 //To add the dragging functionality to labels
 let isLabelDragging = false; // Global flag to track label dragging
@@ -54,7 +50,6 @@ updateHeadingPeriodically();
 
 // Start the movement update loop
 moveAircraftBlips();
-
 
 
 //********aircraft.js script file ends here**********/
@@ -206,8 +201,7 @@ class AircraftBlip {
 
         // Calculate and log bearing and distance
         const { bearing, distanceNM } = this.getBearingAndDistanceFromRadarCenter();
-        //console.log(`C/S ${this.callsign}: Bearing: ${bearing}°, Distance: ${distanceNM} NM`);
-
+        
         this.history.push({ x: this.position.x, y: this.position.y });
 
         if (this.history.length > 12) {
