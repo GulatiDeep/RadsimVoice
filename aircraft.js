@@ -29,6 +29,20 @@ let aircraftCountDisplay = null;
 //To add the dragging functionality to labels
 let isLabelDragging = false; // Global flag to track label dragging
 
+let formationCallsigns = [
+    "Limca", //1
+    "Rhino", //2
+    "Spider", //3
+    "Thunder", //4
+    "Maza", //5
+    "Cobra", //6
+    "Cola", //7
+    "Khanjar", //8
+    "Mica", //9
+    "Loki", //10
+    "Tusker" //11
+];
+
 // Set the initial state of the History button
 document.getElementById('historyDots').classList.add(historyDotsVisible ? 'active' : 'inactive');
 

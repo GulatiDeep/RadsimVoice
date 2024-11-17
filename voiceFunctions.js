@@ -68,9 +68,7 @@ recognition.onend = () => {
 recognition.onresult = (event) => {
     const results = event.results;
     const voiceCommand = results[results.length - 1][0].transcript.toLowerCase().trim();
-    console.log('Controller: ' + voiceCommand);
-    updateStatusBar('Radar: ' + voiceCommand);
-
+    
     // Handle the recognized command
     handleVoiceCommand(voiceCommand);
 };

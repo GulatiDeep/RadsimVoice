@@ -45,7 +45,7 @@ function resetDialogFields() {
 
 
 // Function to remove trailing numbers from a callsign to get formation callsign
-function getBaseCallsign(callsign) {
+function getFormationCallsign(callsign) {
     const parts = callsign.split('-');
     return parts[0]; // Return the base part of the callsign (e.g., Cola from Cola-1, Cola-2)
 }
@@ -130,19 +130,19 @@ function validateInputs() {
     fighterFormation4ac = parseInt(fighterFormation4ac);
 
     // Calculate the total number of unique base callsigns in the existing array
-    const existingBaseCallsigns = new Set();
+    const existingFormationCallsigns = new Set();
     for (const callsign of allAircraftCallsigns) {
-        const baseCallsign = getBaseCallsign(callsign);  // Extract the base callsign (e.g., "Cola" from "Cola-1")
-        existingBaseCallsigns.add(baseCallsign);
+        const formationCallsign = getFormationCallsign(callsign);  // Extract the base callsign (e.g., "Cola" from "Cola-1")
+        existingFormationCallsigns.add(formationCallsign);
     }
 
-    const totalBaseCallsigns = existingBaseCallsigns.size;
+    const totalFormationCallsigns = existingFormationCallsigns.size;
 
     // Check if the number of formations can be created based on available base callsigns
     const requestedFormations = fighterFormation2ac + fighterFormation3ac + fighterFormation4ac;
-    const availableFormations = 11 - totalBaseCallsigns;
+    const availableFormations = 11 - totalFormationCallsigns;
 
-    if (totalBaseCallsigns >= 11) {
+    if (totalFormationCallsigns >= 11) {
         alert("Cannot create more formations. Maximum number of formations (11) reached.");
         return false; // Invalid input due to too many existing formations
     }
@@ -179,7 +179,7 @@ function validateInputs() {
 }
 
 // Helper function to get base callsign from formation callsign (e.g., "Cola-1" -> "Cola")
-function getBaseCallsign(callsign) {
+function getFormationCallsign(callsign) {
     const parts = callsign.split('-');
     return parts[0]; // Return the base part before the dash
 }
@@ -236,34 +236,22 @@ function getRandomTransportCallsign() {
 
 // Function to create a unique formation callsign
 function getRandomFormationCallsign() {
-    const formationCallsigns = [
-        "Limca", //1
-        "Rhino", //2
-        "Spider", //3
-        "Thunder", //4
-        "Maza", //5
-        "Cobra", //6
-        "Cola", //7
-        "Khanjar", //8
-        "Mica", //9
-        "Loki", //10
-        "Tusker" //11
-    ];
-    let baseCallsign;
+    
+    let formationCallsign;
     let attempts = 0;
     const maxAttempts = 100;  // Limit to avoid infinite loop
 
     do {
         const randomIndex = Math.floor(Math.random() * formationCallsigns.length);
-        baseCallsign = formationCallsigns[randomIndex];
+        formationCallsign = formationCallsigns[randomIndex];
         attempts++;
         if (attempts >= maxAttempts) {
             showError("No unique formation callsign could be generated.");
             return null; // If too many attempts, return null to indicate failure
         }
-    } while (allAircraftCallsigns.some(callsign => callsign.startsWith(baseCallsign))); // Ensure base callsign is unique
+    } while (allAircraftCallsigns.some(callsign => callsign.startsWith(formationCallsign))); // Ensure base callsign is unique
 
-    return baseCallsign;
+    return formationCallsign;
 }
 
 // Function to display error message
@@ -287,7 +275,7 @@ function createIndividualAircraft(num) {
 
         totalAircraftCount++;
 
-        console.log(`C/S ${callsign} created as individual aircraft.`);
+        //console.log(`C/S ${callsign} created as individual aircraft.`);
         createControlBox(blip, 1, 1);
     }
     displayAircraftCounts();
@@ -311,7 +299,7 @@ function createTransportAircraft(num) {
 
         totalAircraftCount++;
 
-        console.log(`C/S ${callsign} created as transport aircraft.`);
+        //console.log(`C/S ${callsign} created as transport aircraft.`);
         createControlBox(blip, 1, 1);
     }
     displayAircraftCounts();
@@ -321,29 +309,32 @@ function createTransportAircraft(num) {
 // Function to create aircraft blip for formation aircraft
 function createFormationAircraft(num, formationSize) {
     for (let i = 0; i < num; i++) {
-        const baseCallsign = getRandomFormationCallsign();  // Get unique base callsign
-        if (!baseCallsign) return false;  // Stop creation if any error occurs
-
+        const formationCallsign = getRandomFormationCallsign();  // Get unique base callsign
+        if (!formationCallsign) return false;  // Stop creation if any error occurs
+        
         const position = getRandomPosition();
         const speed = 300;
         const altitude = getRandomAltitude(6000, 10000);
 
         // Create all members of the formation
         for (let j = formationSize; j >= 1; j--) {
-            const callsign = `${baseCallsign}-${j}`;
+            const callsign = `${formationCallsign}-${j}`;
             const blip = new AircraftBlip(callsign, position.firstHeading, speed, altitude, position.x, position.y, '0000');
             blip.role = (j === 1) ? 'Leader' : 'Member';
 
+            // Store the formation size in the blip
+            blip.formationSize = formationSize;
+            
             aircraftBlips.push(blip);
             totalAircraftCount++;
 
             allAircraftCallsigns.push(callsign); // Push the full callsign for each member
-            console.log(`C/S ${callsign} created as formation ${blip.role}.`);
+            //console.log(`C/S ${callsign} created as formation ${blip.role}.`);
         }
 
         // Create control box for each aircraft in formation
         for (let j = 1; j <= formationSize; j++) {
-            const callsign = `${baseCallsign}-${j}`;
+            const callsign = `${formationCallsign}-${j}`;
             const blip = aircraftBlips.find(b => b.callsign === callsign);
             createControlBox(blip, formationSize, j);
         }
@@ -380,7 +371,9 @@ function getRandomPosition() {
 
         // Calculate the opposite heading (180 degrees from the bearing)
         firstHeading = (bearing + 180) % 360;
-
+        // Format heading to always be 3 digits (no decimals)
+        firstHeading = String(Math.round(firstHeading) % 360).padStart(3, '0');
+        
         // Check if the new position is at least 10-20 nautical miles away from any previous position
         isValidPosition = true;
         for (let pos of previousPositions) {

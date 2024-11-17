@@ -36,7 +36,7 @@ function toggleFormationControlBoxes(enable, formationSize, firstAircraftCallsig
 
     // Loop through the formation starting from the next number
     for (let i = startFrom; i <= 4; i++) {
-        const currentCallsign = `${getBaseCallsign(firstAircraftCallsign)}-${i}`;  // Construct the callsign for the rest of the formation
+        const currentCallsign = `${getFormationCallsign(firstAircraftCallsign)}-${i}`;  // Construct the callsign for the rest of the formation
         if (enable) {
             enableControlBox(currentCallsign);
         } else {
@@ -57,7 +57,7 @@ function updateHeadingPeriodically() {
 
 // Function to delete a single aircraft
 function deleteAircraft(blip) {
-    const baseCallsign = getBaseCallsign(blip.callsign);
+    const formationCallsign = getFormationCallsign(blip.callsign);
 
     // Check if the aircraft being deleted is the leader
     if (blip.role === "Leader") {
@@ -71,9 +71,9 @@ function deleteAircraft(blip) {
 
     // Check if the formation is still active
     if (blip.role === "Member" || blip.role === "Leader") {
-        if (!isFormationActive(baseCallsign)) {
+        if (!isFormationActive(formationCallsign)) {
             // If no members are left, remove the base callsign from the list
-            removeBaseCallsignFromSet(baseCallsign);
+            removeFormationCallsignFromSet(formationCallsign);
         }
     }
 
@@ -97,17 +97,17 @@ function deleteAircraft(blip) {
 
 
 // Helper function to check if a formation still has any members
-function isFormationActive(baseCallsign) {
+function isFormationActive(formationCallsign) {
     // Find all aircraft whose callsign starts with the base callsign
-    const formationMembers = aircraftBlips.filter(b => getBaseCallsign(b.callsign) === baseCallsign);
+    const formationMembers = aircraftBlips.filter(b => getFormationCallsign(b.callsign) === formationCallsign);
     
     // If there are no formation members left, the formation is no longer active
     return formationMembers.length > 0;
 }
 
 // Helper function to remove the base callsign from the set of active callsigns
-function removeBaseCallsignFromSet(baseCallsign) {
-    const index = allAircraftCallsigns.findIndex(callsign => getBaseCallsign(callsign) === baseCallsign);
+function removeFormationCallsignFromSet(formationCallsign) {
+    const index = allAircraftCallsigns.findIndex(callsign => getFormationCallsign(callsign) === formationCallsign);
     if (index !== -1) {
         allAircraftCallsigns.splice(index, 1); // Remove the base callsign
     }
@@ -115,7 +115,7 @@ function removeBaseCallsignFromSet(baseCallsign) {
 
 // Helper function to find the next aircraft in the formation (after the leader)
 function findNextAircraftInFormation(leaderBlip) {
-    const baseCallsign = getBaseCallsign(leaderBlip.callsign);
+    const formationCallsign = getFormationCallsign(leaderBlip.callsign);
 
     // Extract the number from the leader's callsign
     const leaderNumberMatch = leaderBlip.callsign.match(/-(\d+)$/);
@@ -127,7 +127,7 @@ function findNextAircraftInFormation(leaderBlip) {
 
     // Find the next aircraft in sequence based on the leader's numeric suffix
     for (let i = startFrom; i <= leaderBlip.formationSize; i++) {
-        const nextCallsign = `${baseCallsign}-${i}`;
+        const nextCallsign = `${formationCallsign}-${i}`;
         const nextBlip = aircraftBlips.find(blip => blip.callsign === nextCallsign);
         //console.log(`Next Callsign in sequence is: ${nextCallsign}`);
         if (nextBlip) return nextBlip;  // Return the next aircraft found
@@ -226,7 +226,7 @@ function createControlBox(blip, formationSize, aircraftIndex) {
     // Event listener for Enter key to handle commands for each aircraft
     controlBox.addEventListener('keypress', (event) => {
         if (event.key === 'Enter') {
-            processCommand(this.formationSize, blip);
+            processCommand(blip);
         }
     });
 }

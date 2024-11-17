@@ -2,40 +2,53 @@
 //********commands.js script file starts here**********/
 
 // Aircraft Commands
-function processCommand(formationSize, blip) {
+function processCommand(blip) {
     const input = document.getElementById(`commandInput_${blip.callsign}`);
     const command = input.value.trim().toUpperCase();
 
-    // Check if the aircraft is a leader and whether the checkbox is checked
-    if (blip.role === "Leader") {
-        const checkbox = document.getElementById(`formationCheckbox_${blip.callsign}`);
+    // Extract the formation callsign
+    const formationCallsign = getFormationCallsign(blip.callsign);
 
-        if (checkbox && checkbox.checked) {  // Propagate if checked
-            console.log(`Command received by C/S ${blip.callsign} for formation. Propagating "${command}" to formation members.`);
-            propagateCommandToFormation(blip, command);
+    // Check if formationCallsign exists in the formationCallsigns array
+    const isMemberOfFormation = formationCallsigns.includes(formationCallsign);
+
+    if (isMemberOfFormation) {
+        
+        // Command is for a formation or its member
+        if (blip.role === "Leader") {
+            const checkbox = document.getElementById(`formationCheckbox_${blip.callsign}`);
+
+            if (checkbox && checkbox.checked) {  // Propagate if checked
+                console.log(`Command received by leader C/S ${blip.callsign} for formation ${formationCallsign}. Propagating "${command}" to formation members.`);
+                speak(` Command received by ${formationCallsign}`);
+                propagateCommandToFormation(formationCallsign, command);
+            } else {
+                console.log(`Command received by specific member: ${blip.callsign} of formation ${formationCallsign}.`);
+                processCommandForBlip(blip, command);  // Execute only for the leader
+                //const voiceCallsign = pronounceCallsign(blip.callsign);
+                speak(` Command received by ${formationCallsign}`);
+            }
         } else {
-            processCommandForBlip(blip, command);  // Execute only for the leader
+            console.log(`Command received by specific member: ${blip.callsign} of formation ${formationCallsign}.`);
+            speak(`Command received by ${blip.callsign}`);
+            processCommandForBlip(blip, command); // Execute for the specific member
         }
-    }
-    else {
-        // Execute the command for the current aircraft (individual, leader, or member)
-        //console.log(`Command "${command}" received by C/S ${blip.callsign}.`);
+    } else {
+        // Command is for an individual aircraft not part of any formation
+        console.log(`Command received by individual aircraft: ${blip.callsign}.`);
+        speak(`Command received by ${blip.callsign}`);
         processCommandForBlip(blip, command);
     }
 
     input.value = ''; // Clear input after processing
 }
 
+
 // Function to propagate commands to formation members in reverse order (last to first)
-function propagateCommandToFormation(leaderBlip, command) {
-    const baseCallsign = getBaseCallsign(leaderBlip.callsign);
-    const formationSize = leaderBlip.formationSize;  // Get the formation size from the leader
-
-    console.log(`Base Callsign: ${baseCallsign}, Formation Size: ${formationSize}`);
-
+function propagateCommandToFormation(formationCallsign, command) {
     // Loop backwards from the last aircraft in the formation to the first (including the leader)
     for (let i = 1; i <= 4; i++) {
-        const currentCallsign = `${baseCallsign}-${i}`;
+        const currentCallsign = `${formationCallsign}-${i}`;
         const currentBlip = aircraftBlips.find(blip => blip.callsign === currentCallsign);
 
         if (currentBlip) {
@@ -54,7 +67,7 @@ function processCommandForBlip(blip, command) {
 
     let isValidCommand = false; // Track whether the command is valid
 
-    console.log(`Command "${command}" received by C/S ${blip.callsign}.`);
+    console.log(`Command "${command}" being executed by C/S ${blip.callsign}.`);
 
     // Handle heading command
     if (headingMatch) {
@@ -133,9 +146,9 @@ function processCommandForBlip(blip, command) {
         const formattedHeading = String(Math.round(blip.heading) % 360).padStart(3, '0');
         updateStatusBar(`Aircraft ${blip.callsign} heading: ${formattedHeading}°`);
         isValidCommand = true;
-        const voiceHeading = pronounceHeading(formattedHeading);
-        const voiceCallsign = pronounceCallsign(blip.callsign);
-        speak(`${voiceCallsign}  Heading ${voiceHeading}`);
+        //const voiceHeading = pronounceHeading(formattedHeading);
+        //const voiceCallsign = pronounceCallsign(blip.callsign);
+        //speak(`${voiceCallsign}  Heading ${voiceHeading}`);
     }
 
     // Handle delete command
@@ -201,52 +214,27 @@ function pronounceCallsign(callsign) {
         '8': 'Eight', '9': 'Nine'
     };
 
-    // Define a mapping for airline abbreviations
-    const airlineNames = {
-        'AI': 'Air India',
-        'IGO': 'Indigo',
-        'EK': 'Emirates',
-        'BA': 'British Airways',
-        'AA': 'American Airlines',
-        'DL': 'Delta Airlines'
-        // Add more as needed
-    };
-
     // Define a mapping for formation callsigns (names like "Cola", "Limca", "Thunder")
-    const formationNames = ['Cola', 'Limca', 'Thunder']; // Add more formation names here if needed
-
-    // Check if the callsign starts with a known airline abbreviation
-    const callsignUpper = callsign.toUpperCase();
-    let airlinePrefix = '';
-    let remainingCallsign = callsign;
-
-    // Check if the first two or three characters match an airline abbreviation
-    if (airlineNames[callsignUpper.slice(0, 3)]) {
-        airlinePrefix = airlineNames[callsignUpper.slice(0, 3)];
-        remainingCallsign = callsign.slice(3);
-    } else if (airlineNames[callsignUpper.slice(0, 2)]) {
-        airlinePrefix = airlineNames[callsignUpper.slice(0, 2)];
-        remainingCallsign = callsign.slice(2);
-    }
-
-    // If an airline prefix is found, handle it
-    if (airlinePrefix) {
-        return airlinePrefix + ' ' + remainingCallsign
-            .split('')
-            .map(char => phoneticAlphabet[char.toUpperCase()] || phoneticAlphabet[char] || char) // Convert remaining letters and digits
-            .join(' ');
-    }
+    const formationCallsigns = [
+        "Limca", //1
+        "Rhino", //2
+        "Spider", //3
+        "Thunder", //4
+        "Maza", //5
+        "Cobra", //6
+        "Cola", //7
+        "Khanjar", //8
+        "Mica", //9
+        "Loki", //10
+        "Tusker" //11
+    ];
 
     // Check if the callsign is a formation name (like "Cola", "Limca", "Thunder")
-    if (formationNames.includes(callsignUpper)) {
-        return callsign + ' ' + remainingCallsign
-            .split('-')[1] // Get the number part after the '-'
-            .split('')
-            .map(char => phoneticAlphabet[char] || char) // Convert digits to phonetic alphabet
-            .join(' ');
+    if (formationCallsigns.includes(callsign)) {
+        return callsign; // Return the callsign as is for formation names
     }
 
-    // If no airline name or formation name is found, proceed with phonetic conversion for the entire callsign
+    // If no formation name is found, proceed with phonetic conversion for the entire callsign
     return callsign
         .split('')
         .map(char => phoneticAlphabet[char.toUpperCase()] || phoneticAlphabet[char] || char) // Convert letters and digits
@@ -274,4 +262,3 @@ function formatHeading(heading) {
     return String(heading).padStart(3, '0');
 }
 //********commands.js script file ends here**********/
-
