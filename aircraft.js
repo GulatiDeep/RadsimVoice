@@ -17,6 +17,9 @@ let labelsVisible = true; // //Initialize the flag to track the visibility state
 
 let allAircraftCallsigns = []; //to initialise the list of callsigns array
 
+// A list to store previously generated positions
+let previousPositions = [];
+
 // Initialize counters for number of aircraft
 let totalAircraftCount = 0;  // Count of all aircraft, including individual, transport, and formation members
 

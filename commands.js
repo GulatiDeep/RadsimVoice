@@ -143,7 +143,6 @@ function processCommandForBlip(blip, command) {
 
     // Handle orbit left command
     else if (command === "OL") {
-        console.log(blip.heading);
         blip.startOrbitLeft();
         updateStatusBar(`Aircraft ${blip.callsign} orbiting left.`);
         isValidCommand = true;
@@ -152,7 +151,6 @@ function processCommandForBlip(blip, command) {
 
     // Handle orbit right command
     else if (command === "OR") {
-        console.log(blip.heading);
         blip.startOrbitRight();
         updateStatusBar(`Aircraft ${blip.callsign} orbiting right.`);
         isValidCommand = true;

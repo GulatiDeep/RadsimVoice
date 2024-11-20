@@ -84,7 +84,6 @@ function displayAircraftCounts() {
 
 // Function to Create Aircraft blip(s) after validating inputs from Dialog Box
 
-// Function to create aircraft blip
 function createAircraftBlip() {
     // Get selected values from the dropdowns in the dialog
     const numIndividualFighters = parseInt(document.getElementById('individualFighterInput').value, 10);
@@ -209,7 +208,7 @@ function getRandomIndividualCallsign() {
 
 // Function to create a unique transport aircraft callsign
 function getRandomTransportCallsign() {
-    const prefixes = ["VC", "VE", "VG", "VH", "VK", "VU", "VV"];
+    const prefixes = ["VC", "VG", "VH", "VK"];
     const maxAttempts = 50; // Limit to avoid infinite loop
     let callsign;
     let attempts = 0;
@@ -266,9 +265,9 @@ function createIndividualAircraft(num) {
         if (!callsign) return false;  // Stop creation if any error occurs
 
         const position = getRandomPosition();
-        const heading = getRandomHeading();
+        const heading = getInitialHeading(position.x, position.y);
         const speed = 300;
-        const altitude = getRandomAltitude(6000, 10000);
+        const altitude = getRandomAltitude(6000, 20000);
 
         const blip = new AircraftBlip(callsign, heading, speed, altitude, position.x, position.y, '0000');
         blip.role = 'Individual';
@@ -276,7 +275,8 @@ function createIndividualAircraft(num) {
 
         totalAircraftCount++;
 
-        //console.log(`C/S ${callsign} created as individual aircraft.`);
+        processCommandForBlip(blip,'OR');  //for initial orbit
+            
         createControlBox(blip, 1, 1);
     }
     displayAircraftCounts();
@@ -293,10 +293,10 @@ function createTransportAircraft(num) {
         if (!callsign) return false;  // Stop creation if any error occurs
 
         const position = getRandomPosition();
-        const heading = getRandomHeading();
+        const heading = getInitialHeading(position.x, position.y);
         const ssrCode = getRandomSSRCode();
         const speed = 250;
-        const altitude = getRandomAltitude(6000, 10000);
+        const altitude = getRandomAltitude(10000, 20000);
 
         const blip = new AircraftBlip(callsign, heading, speed, altitude, position.x, position.y, ssrCode);
         blip.role = 'Individual';
@@ -318,9 +318,9 @@ function createFormationAircraft(num, formationSize) {
         if (!formationCallsign) return false;  // Stop creation if any error occurs
         
         const position = getRandomPosition();
-        const heading = getRandomHeading();
+        const heading = getInitialHeading(position.x, position.y);
         const speed = 300;
-        const altitude = getRandomAltitude(6000, 10000);
+        const altitude = getRandomAltitude(8000, 20000);
 
         // Create all members of the formation
         for (let j = formationSize; j >= 1; j--) {
@@ -334,6 +334,8 @@ function createFormationAircraft(num, formationSize) {
             aircraftBlips.push(blip);
             totalAircraftCount++;
 
+            processCommandForBlip(blip,'OL');  //for initial orbit
+            
             allAircraftCallsigns.push(callsign); // Push the full callsign for each member
             //console.log(`C/S ${callsign} created as formation ${blip.role}.`);
         }
@@ -350,19 +352,14 @@ function createFormationAircraft(num, formationSize) {
 }
 
 
-
-
-// A list to store previously generated positions
-let previousPositions = [];
-
 function getRandomPosition() {
     let distance, heading, x, y;
     let isValidPosition = false;
 
     // Repeat the process until a valid position (at least 10-20 nautical miles apart) is found
     while (!isValidPosition) {
-        // Random distance between 30 and 50 nautical miles
-        distance = Math.random() * (55 - 30) + 30;
+        // Random distance between 20 and 50 nautical miles
+        distance = Math.random() * (50 - 20) + 20;
 
         // Random heading between 0 and 360 degrees
         heading = Math.random() * 360;
@@ -379,7 +376,7 @@ function getRandomPosition() {
             let distanceBetween = Math.sqrt(dx * dx + dy * dy); // Calculate the distance between two points
 
             // If the new position is too close to any previous position, mark it as invalid
-            if (distanceBetween < 10) {
+            if (distanceBetween < 20) {
                 isValidPosition = false;
                 break; // Exit the loop and try generating a new position
             }
@@ -393,48 +390,16 @@ function getRandomPosition() {
     return { x, y };
 }
 
-
-function getRandomPosition1() {
-    let distance, heading, x, y;
-    let isValidPosition = false;
-
-    // Repeat the process until a valid position (at least 10-20 nautical miles apart) is found
-    while (!isValidPosition) {
-        // Random distance between 20 and 60 nautical miles
-        distance = Math.random() * (60 - 20) + 20;
-
-        // Random heading between 0 and 360 degrees
-        heading = Math.random() * 360;
-
-        // Convert polar coordinates (distance, heading) to cartesian coordinates (x, y)
-        x = distance * Math.cos(heading * Math.PI / 180); // x is the distance projected along the x-axis
-        y = distance * Math.sin(heading * Math.PI / 180); // y is the distance projected along the y-axis
-
-        // Check if the new position is at least 10-20 nautical miles away from any previous position
-        isValidPosition = true;
-        for (let pos of previousPositions) {
-            let dx = x - pos.x;
-            let dy = y - pos.y;
-            let distanceBetween = Math.sqrt(dx * dx + dy * dy); // Calculate the distance between two points
-
-            // If the new position is too close to any previous position, mark it as invalid
-            if (distanceBetween < 10) {
-                isValidPosition = false;
-                break; // Exit the loop and try generating a new position
-            }
-        }
-    }
-
-    // Store the new position
-    previousPositions.push({ x, y });
-
-    // Return the valid position
-    return { x, y };
-}
-
-function getRandomHeading() {
+function getRandomHeading1() {
     return Math.floor(Math.random() * 36) * 10;  // Generates multiples of 10 from 0 to 350
 }
+
+function getInitialHeading(x, y) {
+    const brg = (Math.atan2(x * zoomLevel, y * zoomLevel) * (180 / Math.PI) + 360) % 360;
+    const hdg = (brg + 180) % 360; // Opposite direction
+    return Math.floor(hdg); // Returns the opposite heading as an integer
+}
+
 
 function getRandomAltitude(min, max) {
     // Generate a random altitude between min and max, and round it to the nearest multiple of 100

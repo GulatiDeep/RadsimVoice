@@ -73,41 +73,6 @@ function handleVoiceCommand(command) {
         inputElement.value = ''; // Clear input field after processing
     }
 
-    // // Step 5: Extract the formation callsign
-    // const formationCallsign = getFormationCallsign(blip.callsign);
-    // const isMemberOfFormation = formationCallsigns.includes(formationCallsign);
-
-    // // Step 6: Command handling based on formation membership
-    // if (isMemberOfFormation) {
-    //     console.log(`Command for formation: ${formationCallsign}`);
-
-    //     // Step 6.1: If the blip is the leader of the formation
-    //     if (blip.role === "Leader") {
-    //         const checkbox = document.getElementById(`formationCheckbox_${blip.callsign}`);
-
-    //         if (checkbox && checkbox.checked) {  // Propagate command if the checkbox is checked
-    //             console.log(`Leader C/S ${blip.callsign} for formation ${formationCallsign} will propagate command "${parsedCommand}" to formation members.`);
-    //             speak(`Command received by leader ${formationCallsign}. Propagating to formation.`);
-    //             propagateCommandToFormation(formationCallsign, parsedCommand);
-    //         } else {
-    //             console.log(`Command for member: ${blip.callsign} of formation ${formationCallsign}.`);
-    //             speak(`Command received by ${blip.callsign}`);
-    //             processCommandForBlip(blip, parsedCommand);  // Execute only for the leader
-    //         }
-    //     } else {
-    //         // Step 6.2: If the blip is a member of the formation
-    //         console.log(`Command for member: ${blip.callsign} of formation ${formationCallsign}.`);
-    //         speak(`Command received by ${blip.callsign}`);
-    //         processCommandForBlip(blip, parsedCommand);  // Execute for the specific member
-    //     }
-    // } else {
-    //     // Step 7: If the callsign is not part of a formation, handle as individual aircraft
-    //     console.log(`Command for individual aircraft: ${blip.callsign}.`);
-    //     speak(`Command received by ${blip.callsign}`);
-    //     processCommandForBlip(blip, parsedCommand);
-    // }
-
-    
 }
 
 function normalizeCommandInput(command) {
@@ -213,15 +178,33 @@ function parseCommand(remainingCommand) {
         case 'turn':
             if (words[1] === 'right' && words[2] === 'heading') {
                 // Extract 3-digit number or phonetic number
-                const number = getTurnNumber(words[3], phoneticMap);
+                const number = getNumber(words[3], phoneticMap);
                 if (number) {
                     parsedCommand = `R${number}`; // "Turn right heading <number>" → "R<number>"
                 }
             } else if (words[1] === 'left' && words[2] === 'heading') {
                 // Extract 3-digit number or phonetic number
-                const number = getTurnNumber(words[3], phoneticMap);
+                const number = getNumber(words[3], phoneticMap);
                 if (number) {
                     parsedCommand = `L${number}`; // "Turn left heading <number>" → "L<number>"
+                }
+            }
+            break;
+
+        case 'climb':
+            if (words[1] === 'to' && words[3] === 'thousand' && words[4] === 'feet') {
+                const number = getNumber(words[2], phoneticMap);
+                if (number) {
+                    parsedCommand = `H${number * 10}`; // "Climb to <number> thousand feet" → "H<number*10>"
+                }
+            }
+            break;
+
+        case 'descend':
+            if (words[1] === 'to' && words[3] === 'thousand' && words[4] === 'feet') {
+                const number = getNumber(words[2], phoneticMap);
+                if (number) {
+                    parsedCommand = `H${number * 10}`; // "Descend to <number> thousand feet" → "H<number*10>"
                 }
             }
             break;
@@ -239,7 +222,7 @@ function getBlipByCallsign(callsign) {
 }
 
 // Helper function to parse a number from a word (either digit or phonetic)
-function getTurnNumber(input, phoneticMap) {
+function getNumber(input, phoneticMap) {
     if (!isNaN(input)) {
         return input.length === 3 ? input : null; // Must be a 3-digit number
     }
@@ -248,18 +231,10 @@ function getTurnNumber(input, phoneticMap) {
     return phoneticNumber ? phoneticNumber : null; // Return the phonetic number if valid, else null
 }
 
-
 // Helper function to check if the input is a numeric value
 function isNumeric(value) {
     return !isNaN(value) && !isNaN(parseFloat(value));
 }
-
-// Placeholder for executing commands
-function executeCommandForCallsign(callsign, userCommand) {
-    console.log(`Executing command: "${userCommand}" for callsign: "${callsign}"`);
-    // Implementation to process the command based on callsign
-}
-
 
 // Normalize to handle common mispronunciations
 function applyReplacements(command) {
