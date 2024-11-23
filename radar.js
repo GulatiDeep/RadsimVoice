@@ -428,48 +428,28 @@
         };
     }
 
+// Reference the display element in the HTML
+const displayElement = document.getElementById('radarDisplay');
 
-    let displayElement = null;
+// Function to update the display element with distance and bearing
+function updateDisplay(x, y) {
+    if (!displayElement) return; // Ensure the display element exists
 
-    // Function to create the display element if it doesn't exist
-    function createDisplayElement() {
-        if (!displayElement) {
-            displayElement = document.createElement('div');
-            displayElement.style.position = 'fixed'; // Fixed position to stay at the top left corner
-            displayElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-            displayElement.style.color = 'white';
-            displayElement.style.padding = '5px';
-            displayElement.style.borderRadius = '3px';
-            displayElement.style.fontSize = '12px';
-            displayElement.style.zIndex = '1000'; // Ensure it's above other elements
-            document.body.appendChild(displayElement);
-        }
-    }
+    const rect = radarScope.getBoundingClientRect();
+    const result = getDistanceAndBearing(x - rect.left, y - rect.top);
 
-    // Function to update the display element with distance and bearing
-    function updateDisplay(x, y) {
-        createDisplayElement(); // Ensure the display element is created
+    // Update the content of the display element
+    displayElement.textContent = `${result.bearing}° / ${result.distanceNM} NM`;
+}
 
-        const rect = radarScope.getBoundingClientRect();
-        const result = getDistanceAndBearing(x - rect.left, y - rect.top);
+// Event listener for mouse move to update the display
+radarScope.addEventListener('mousemove', (event) => {
+    const rect = radarScope.getBoundingClientRect();
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
 
-        displayElement.style.left = '10px'; // Position at top left corner
-        displayElement.style.top = '10px';
-        displayElement.textContent = `${result.bearing}° / ${result.distanceNM} NM`;
-    }
-
-    // Event listener for mouse move to update the display
-    radarScope.addEventListener('mousemove', (event) => {
-        const rect = radarScope.getBoundingClientRect();
-        const mouseX = event.clientX;
-        const mouseY = event.clientY;
-
-        updateDisplay(mouseX, mouseY);
-    });
-
-    // Initialize the display element on page load
-    createDisplayElement();
-
+    updateDisplay(mouseX, mouseY);
+});
 
 
     //******************Functions related to radar scope******************//
@@ -542,6 +522,20 @@
         return { x: relativeX, y: relativeY };
     }
 
+    // Function to request fullscreen
+function openFullscreen() {
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+    } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+        document.documentElement.mozRequestFullScreen();
+    } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
+        document.documentElement.webkitRequestFullscreen();
+    } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+        document.documentElement.msRequestFullscreen();
+    }
+}
+
+
     
     //radar.js script file ends here
 
@@ -610,5 +604,14 @@
         createRangeRings();  // Reposition range rings correctly
         aircraftBlips.forEach(blip => blip.updateBlipPosition());
     });
+
+   
+
+// Check for orientation change
+window.addEventListener('orientationchange', function() {
+    if (window.orientation === 0) { // Portrait mode
+        alert("Please rotate your device to landscape mode for the best experience.");
+    }
+});
 
 

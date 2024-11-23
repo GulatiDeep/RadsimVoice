@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radar Simulator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
+    <title>Voice Input Based Radar Simulator</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -29,7 +29,27 @@
 
         <div id="radarContainer">
 
+            
+            
+            
+
             <div id="radarScope">
+                <table class="top-table">
+                    <tr>
+                        <td class="table-cell" id="radarDisplay">
+                            000° / 00.0 NM
+                        </td>
+                        <td class="table-cell" id="aircraftCountDisplay">
+                            Total Aircraft: 0<!-- Aircraft Count Display -->
+                        </td>
+                        <td class="table-cell">
+                            
+                        </td>
+                        <td class="table-cell">
+                            <button id="pauseButton" class="control-button">Pause</button>
+                        </td>
+                    </tr>
+                </table>
                 <div id="panContainer">
                     <!-- North Marker line -->
                     <div id="northLine"></div>
@@ -48,9 +68,8 @@
                     <div id="runway" class="runway"></div>
                     <div id="directionLine" class="direction-line"></div>
                 </div>
-                
-                <button id="pauseButton" class="control-button"
-                    style="position: absolute; top: 10px; right: 10px;">Pause</button>
+
+
             </div>
 
             <div class="menu-bar">
@@ -91,9 +110,6 @@
                 <div id="statusBar" class="status-bar"></div> <!-- Status bar element -->
             </div>
 
-
-
-
         </div>
 
         <div id="controlPanel">
@@ -110,8 +126,8 @@
         </div>
 
 
-
-        <!-- Aircraft Creation Dialog -->
+        <!-- Dialog Boxes-->
+        <!-- initial Aircraft Creation Dialog -->
         <div id="initialAircraftDialog" class="dialog" style="display:none;">
             <div class="dialog-content">
 
@@ -150,7 +166,7 @@
             </div>
         </div>
 
-        <!-- Aircraft Creation Dialog -->
+        <!-- Manual Aircraft Creation Dialog -->
         <div id="aircraftDialog" class="dialog" style="display:none;">
             <div class="dialog-content">
 
@@ -178,7 +194,7 @@
 
                 </fieldset>
 
-                
+
                 <!-- Create and Cancel buttons -->
                 <div>
                     <button id="createAircraftButton" class="control-button">Create</button>
@@ -186,7 +202,6 @@
                 </div>
             </div>
         </div>
-
 
         <!-- Help Dialog -->
         <div id="helpDialog" class="help-dialog">
@@ -199,12 +214,13 @@
     <div id="controlStatusBar">
         © For Feedback, please contact Deep Gulati.
     </div>
-    <!-- Custom Context Menu -->
+
+    <!-- Custom Right Click Context Menu -->
     <ul id="radarContextMenu" class="context-menu" style="display: none;">
         <li id="createAircraftContextMenu">Create Aircraft</li>
     </ul>
 
-
+    <!-- Scripts -->
     <script src="radar.js"></script>
     <script src="readme.js"></script>
     <script src="aircraftCreation.js"></script>

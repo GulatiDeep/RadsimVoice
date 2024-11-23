@@ -561,32 +561,20 @@ function getRandomSSRCode() {
     return validSSRCodes[randomIndex];
 }
 
-// Function to create the display element if it doesn't exist
-function createAircraftCountDisplay() {
-    if (!aircraftCountDisplay) {
-        aircraftCountDisplay = document.createElement('div');
-        aircraftCountDisplay.style.position = 'fixed'; // Fixed position to stay at the top left corner
-        aircraftCountDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        aircraftCountDisplay.style.color = 'white';
-        aircraftCountDisplay.style.padding = '5px';
-        aircraftCountDisplay.style.borderRadius = '3px';
-        aircraftCountDisplay.style.fontSize = '12px';
-        aircraftCountDisplay.style.zIndex = '1000'; // Ensure it's above other elements
-        aircraftCountDisplay.style.left = '10px'; // Position at top left corner
-        aircraftCountDisplay.style.top = '30px';
-        document.body.appendChild(aircraftCountDisplay);
+// Function to update aircraft counts in the display element
+function displayAircraftCounts() {
+    const aircraftCountDisplay = document.getElementById('aircraftCountDisplay');
+    
+    // Ensure the element exists before updating
+    if (aircraftCountDisplay) {
+        aircraftCountDisplay.innerHTML = `Total Aircraft: ${totalAircraftCount}`;
+    //     aircraftCountDisplay.innerHTML = `
+    //      <strong>Total Aircraft:</strong> ${totalAircraftCount}<br> 
+    //      ${allAircraftCallsigns.join('<br>')}`;
+    
     }
 }
 
-// Function to update aircraft counts in the display element
-function displayAircraftCounts() {
-    createAircraftCountDisplay();
-
-    aircraftCountDisplay.innerHTML = `
-         <strong>Total Aircraft:</strong> ${totalAircraftCount}<br> 
-         ${allAircraftCallsigns.join('<br>')}
-    `;
-}
 
 // Function to remove trailing numbers from a callsign to get formation callsign (e.g., "Cola-1" -> "Cola")
 function getFormationCallsign(callsign) {
@@ -653,6 +641,7 @@ document.getElementById('aircraftDialog').addEventListener('keypress', (event) =
 // Event listener for creating Initial aircraft settings from "enter key" on dialog box
 document.getElementById('initialAircraftDialog').addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
+        openFullscreen();
         if (createInitialAircraftBlip()) {
             closeInitialAircraftDialog();
         }
@@ -661,17 +650,24 @@ document.getElementById('initialAircraftDialog').addEventListener('keypress', (e
 
 // Event listener for creating Initial aircraft settings from click on "Create" Button
 document.getElementById('createInitialAircraftButton').addEventListener('click', () => {
+    openFullscreen();
     if (createInitialAircraftBlip()) {  // Attempt to create aircraft blip
         closeInitialAircraftDialog();   // Close dialog if creation was successful
     }
 });
 
 // Event listener for "Cancel" button for closing Initial aircraft dialog box without making any changes
-document.getElementById('cancelInitialAircraftButton').addEventListener('click', closeInitialAircraftDialog);
+document.getElementById('cancelInitialAircraftButton').addEventListener('click', () => {
+    openFullscreen();
+    closeInitialAircraftDialog();
+});
+
+//document.getElementById('cancelInitialAircraftButton').addEventListener('click', closeInitialAircraftDialog);
 
 // Event listener for closing Initial aircraft dialog through "escape key" without making any changes
 document.getElementById('initialAircraftDialog').addEventListener('keypress', (event) => {
     if (event.key === 'Escape') {
-        closeInitialAircraftDialog(); // Close the dialog when "Esc" is pressed
+        openFullscreen();
+    closeInitialAircraftDialog(); // Close the dialog when "Esc" is pressed
     }
 });
