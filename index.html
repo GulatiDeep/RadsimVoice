@@ -112,12 +112,12 @@
 
 
         <!-- Aircraft Creation Dialog -->
-        <div id="aircraftDialog" class="dialog" style="display:none;">
+        <div id="initialAircraftDialog" class="dialog" style="display:none;">
             <div class="dialog-content">
 
                 <!-- Aircraft Information Fieldset -->
                 <fieldset style="border-radius: 8px;">
-                    <legend style="font-weight: bold;">Aircraft Creation</legend>
+                    <legend style="font-weight: bold;">Initial Exercise Settings</legend>
 
                     <!-- Individual Fighter input -->
                     <label for="individualFighterInput">Individual Fighter AC:</label>
@@ -142,6 +142,43 @@
                 </fieldset>
 
 
+                <!-- Create and Cancel buttons -->
+                <div>
+                    <button id="createInitialAircraftButton" class="control-button">Create</button>
+                    <button id="cancelInitialAircraftButton" class="control-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aircraft Creation Dialog -->
+        <div id="aircraftDialog" class="dialog" style="display:none;">
+            <div class="dialog-content">
+
+                <!-- Aircraft Information Fieldset -->
+                <fieldset style="border-radius: 8px;">
+                    <legend style="font-weight: bold;">Aircraft Creation</legend>
+
+                    <!-- Aircraft Type input -->
+                    <label for="aircraftTypeInput">Aircraft Type:</label>
+                    <div class="dropdown">
+                        <select id="aircraftTypeInput">
+                            <!-- Aircraft Type Options -->
+                            <option value="individualTransport">Transport Aircraft</option>
+                            <option value="individualFighter">Individual Fighter Aircraft</option>
+                            <option value="fighterFormation2ac">2 Aircraft Formation</option>
+                            <option value="fighterFormation3ac">3 Aircraft Formation</option>
+                            <option value="fighterFormation4ac">4 Aircraft Formation</option>
+                        </select>
+                    </div>
+
+                    <!-- Heading input -->
+                    <label for="headingInput">Heading (001-360):</label>
+                    <input type="number" id="headingInput" min="000" max="360" value="001" required>
+
+
+                </fieldset>
+
+                
                 <!-- Create and Cancel buttons -->
                 <div>
                     <button id="createAircraftButton" class="control-button">Create</button>
@@ -173,7 +210,6 @@
     <script src="aircraftCreation.js"></script>
     <script src="functions.js"></script>
     <script src="aircraft.js"></script>
-    <script src="eventListeners.js"></script>
     <script src="commands.js"></script>
     <script src="voiceFunctions.js"></script>
     <script src="voiceCommands.js"></script>

@@ -543,5 +543,72 @@
     }
 
     
-
     //radar.js script file ends here
+
+    
+//********All event listeners w.r.t. radar scope placed here**********/
+
+    // Attach event listener to the pause button
+    document.getElementById('pauseButton').addEventListener('click', togglePause);
+
+    //Event listener to Toggle the visibility of labels and update the button's appearance
+    document.getElementById('label').addEventListener('click', () => {
+        labelsVisible = !labelsVisible;
+
+        // Get the label button element
+        const labelButton = document.getElementById('label');
+
+        // Update the button's appearance based on the current state
+        if (labelsVisible) {
+            labelButton.classList.add('active');
+            labelButton.classList.remove('inactive');
+            updateStatusBar('Labels Visible');
+        } else {
+            labelButton.classList.add('inactive');
+            labelButton.classList.remove('active');
+            updateStatusBar('Labels Hidden');
+        }
+
+        // Update visibility for all aircraft labels and lines
+        aircraftBlips.forEach(blip => {
+            if (blip.label) {
+                blip.label.style.display = labelsVisible ? 'block' : 'none';
+            }
+            if (blip.line) {
+                blip.line.style.display = labelsVisible ? 'block' : 'none';
+            }
+        });
+    });
+
+    //Event listener to Toggle the visibility of history dots and update the button's appearance
+    document.getElementById('historyDots').addEventListener('click', () => {
+        // Toggle the visibility state
+        historyDotsVisible = !historyDotsVisible;
+
+        // Get the history button element
+        const historyButton = document.getElementById('historyDots');
+
+        // Update the button's appearance based on the current state
+        if (historyDotsVisible) {
+            historyButton.classList.add('active');
+            historyButton.classList.remove('inactive');
+            updateStatusBar('History Dots Visible');
+        } else {
+            historyButton.classList.add('inactive');
+            historyButton.classList.remove('active');
+            updateStatusBar('History Dots Hidden');
+        }
+
+        // Immediately apply the visibility change by updating all blips
+        aircraftBlips.forEach(blip => blip.updateHistoryDots());
+    });
+
+
+    // Attach event listeners to track window resizing or zooming
+    window.addEventListener('resize', () => {
+        updateRadarCenter();
+        createRangeRings();  // Reposition range rings correctly
+        aircraftBlips.forEach(blip => blip.updateBlipPosition());
+    });
+
+
