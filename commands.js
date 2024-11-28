@@ -2,10 +2,11 @@
 //********commands.js script file starts here**********/
 
 // Aircraft Commands
-function processCommand(blip) {
+function processCommand(blip, cmd) {
     const input = document.getElementById(`commandInput_${blip.callsign}`);
-    const command = input.value.trim().toUpperCase();
-
+    //const command = input.value.trim().toUpperCase();
+    const command = cmd || input.value.trim().toUpperCase(); // Use provided command or get it
+        
     // Extract the formation callsign
     const formationCallsign = getFormationCallsign(blip.callsign);
 
@@ -240,3 +241,5 @@ function formatHeading(heading) {
     return String(heading).padStart(3, '0');
 }
 //********commands.js script file ends here**********/
+
+

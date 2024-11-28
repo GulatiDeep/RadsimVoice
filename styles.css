@@ -553,6 +553,8 @@ html {
     /* Prevents text selection when clicking */
     overflow: visible;
     /* Ensure no overflow issues */
+    position: relative; /* Ensure the control-box is the reference for absolute positioning */
+    
 }
 
 .control-box input:focus {
@@ -610,7 +612,7 @@ html {
 
 /* Input field in control box */
 .control-box input {
-    width: 40%;
+    width: 30%;
     padding: 5px;
     border-radius: 4px;
     border: 1px solid #ccc;
@@ -825,6 +827,8 @@ html {
 }
 
 
+
+
 /* Help Dialog content layout */
 .help-dialog {
     display: none;
@@ -891,4 +895,62 @@ html {
 .help-button:hover {
     background-color: #0056b3;
     /* Darker blue on hover */
+}
+
+/* Left and Right orbit buttons */
+.orbit-left-button,
+.orbit-right-button {
+    position: absolute;
+    bottom: 3px; /* Positioned at the bottom of the control box */
+    font-size: 15px; /* Match font size */
+    font-weight: bold; /* Bold for better visibility */
+    color: black;
+    border: 2px solid black; /* Subtle border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+}
+
+.checkbox {
+    position: absolute;
+    bottom: 3px; /* Positioned at the bottom of the control box */
+    right: 70px; /* To the left of the right button */
+}
+
+.orbit-left-button:hover,
+.orbit-right-button:hover {
+    background-color: #007bff; /* Darker blue on hover */
+    color: white; /* White text on hover */
+}
+
+/* Positioning for orbit buttons */
+.orbit-left-button {
+    right: 70px; /* To the left of the right button */
+}
+
+.orbit-right-button {
+    right: 35px; /* Flush with the control box edge */
+}
+
+/* Delete button */
+.delete-button {
+    position: absolute;
+    right: 5px;
+    font-size: 15px; /* Match font size */
+    font-weight: bold;
+    color: white; /* White text */
+    background-color: red; /* Red for critical action */
+    border: 2px solid darkred;
+    border-radius: 5px; /* Circular button */
+    cursor: pointer;
+    bottom: 3px; /* Positioned at the bottom of the control box */
+}
+
+.delete-button:hover {
+    background-color: darkred; /* Darker red on hover */
+}
+
+.control-buttons-container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 5px;
 }

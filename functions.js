@@ -75,9 +75,12 @@ function deleteAircraft(blip) {
             // If no members are left, remove the base callsign from the list
             removeFormationCallsignFromSet(formationCallsign);
         }
+    } else {
+        // If deleting an individual aircraft, ensure no formation-related cleanup is required
+        console.log(`Deleting individual aircraft: ${blip.callsign}`);
     }
 
-    // Decrement the total aircraft count (once per aircraft)
+    // Decrement the total aircraft count
     totalAircraftCount--;
 
     // Remove the callsign from the allAircraftCallsigns array
@@ -89,11 +92,47 @@ function deleteAircraft(blip) {
     // Remove the elements from the DOM
     removeAircraftElements(blip);
 
+    // Update control boxes for remaining formation members
+    const remainingMembers = aircraftBlips.filter(member =>
+        getFormationCallsign(member.callsign) === formationCallsign
+    );
+
+    remainingMembers.forEach(member => {
+        const controlBox = document.getElementById(`controlBox_${member.callsign}`);
+        if (controlBox) {
+            // Ensure the buttons and event listeners are attached
+            if (!document.getElementById(`orbitLeft_${member.callsign}`)) {
+                controlBox.querySelector('.command-input-container').innerHTML += `
+                    <div class="control-buttons-container">
+                        <button class="control-button orbit-left-button" id="orbitLeft_${member.callsign}">←</button>
+                        <button class="control-button orbit-right-button" id="orbitRight_${member.callsign}">→</button>
+                        <button class="control-button delete-button" id="delete_${member.callsign}">X</button>
+                    </div>
+                `;
+
+                // Attach event listeners to the new buttons
+                document.getElementById(`orbitLeft_${member.callsign}`).addEventListener('click', () => {
+                    processCommandForBlip(member, "OL");
+                });
+
+                document.getElementById(`orbitRight_${member.callsign}`).addEventListener('click', () => {
+                    processCommandForBlip(member, "OR");
+                });
+
+                document.getElementById(`delete_${member.callsign}`).addEventListener('click', () => {
+                    deleteAircraft(member);
+                });
+            }
+        }
+    });
+
     // Display the updated counts
     displayAircraftCounts();
 
+    // Update the status bar
     updateStatusBar(`Aircraft ${blip.callsign} deleted.`);
 }
+
 
 
 // Helper function to check if a formation still has any members
@@ -141,26 +180,35 @@ function promoteToLeader(newLeaderBlip, newFormationSize) {
     newLeaderBlip.role = "Leader";  // Assign leader role
     newLeaderBlip.formationSize = newFormationSize - 1;  // Update formation size
 
-    // Update the control box: Add the checkbox to the new leader (unchecked by default)
     const controlBox = document.getElementById(`controlBox_${newLeaderBlip.callsign}`);
+
     if (controlBox) {
-        controlBox.querySelector('.command-input-container').innerHTML += `
-            <input type="checkbox" id="formationCheckbox_${newLeaderBlip.callsign}">
-        `;
+        // Reinitialize control box HTML to add buttons
+        controlBox.querySelector('.command-input-container').innerHTML += `<input class= "checkbox" type="checkbox" id="formationCheckbox_${newLeaderBlip.callsign}">`;
 
+        // Re-attach event listeners to buttons
+        document.getElementById(`orbitLeft_${newLeaderBlip.callsign}`).addEventListener('click', () => {
+            processCommand(newLeaderBlip, "OL");
+        });
 
-        // Add event listener for the checkbox in the first aircraft's control box
-        if (newFormationSize >= 1) {
-            const checkbox = document.getElementById(`formationCheckbox_${newLeaderBlip.callsign}`);
-            checkbox.addEventListener('change', function () {
-                toggleFormationControlBoxes(!checkbox.checked, newFormationSize, newLeaderBlip.callsign); // Reversed logic
-            });
-        }
-        console.log(`${newLeaderBlip.callsign} is now new Formation leader. Remaining Formation size is ${newLeaderBlip.formationSize}.`)
+        document.getElementById(`orbitRight_${newLeaderBlip.callsign}`).addEventListener('click', () => {
+            processCommand(newLeaderBlip, "OR");
+        });
 
+        document.getElementById(`delete_${newLeaderBlip.callsign}`).addEventListener('click', () => {
+            processCommand(newLeaderBlip, "DEL");
+        });
+
+        // Add event listener for the checkbox
+        const checkbox = document.getElementById(`formationCheckbox_${newLeaderBlip.callsign}`);
+        checkbox.addEventListener('change', function () {
+            toggleFormationControlBoxes(!checkbox.checked, newFormationSize, newLeaderBlip.callsign); // Reversed logic
+        });
+
+        console.log(`${newLeaderBlip.callsign} is now the new leader of the formation.`);
     }
-
 }
+
 
 // Helper function to remove aircraft elements from the DOM
 function removeAircraftElements(blip) {
@@ -204,7 +252,10 @@ function createControlBox(blip, formationSize, aircraftIndex) {
             <input type="text" id="commandInput_${blip.callsign}">
             <span id="lastCommand_${blip.callsign}" class="last-command"></span>
             ${formationSize > 1 && aircraftIndex === 1 ?
-            `<input type="checkbox" id="formationCheckbox_${blip.callsign}" checked> ` : ''}
+            `<input class= "checkbox" type="checkbox" id="formationCheckbox_${blip.callsign}" checked> `:''}
+            <button class="control-button orbit-left-button" id="orbitLeft_${blip.callsign}">←</button>
+            <button class="control-button orbit-right-button" id="orbitRight_${blip.callsign}">→</button>
+            <button class="control-button delete-button" id="delete_${blip.callsign}">X</button>
         </div>
     `;
 
@@ -229,6 +280,19 @@ function createControlBox(blip, formationSize, aircraftIndex) {
             processCommand(blip);
         }
     });
+
+    // Event listeners for the buttons
+document.getElementById(`orbitLeft_${blip.callsign}`).addEventListener('click', () => {
+    processCommand(blip, "OL");
+});
+
+document.getElementById(`orbitRight_${blip.callsign}`).addEventListener('click', () => {
+    processCommand(blip, "OR");
+});
+
+document.getElementById(`delete_${blip.callsign}`).addEventListener('click', () => {
+    processCommand(blip, "DEL");
+});
 }
 
 // Function to update the speed and heading in the control box
