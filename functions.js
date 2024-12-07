@@ -105,6 +105,7 @@ function deleteAircraft(blip) {
                 controlBox.querySelector('.command-input-container').innerHTML += `
                     <div class="control-buttons-container">
                         <button class="control-button orbit-left-button" id="orbitLeft_${member.callsign}">←</button>
+                        <button class="control-button stop-turn-button" id="stopTurn_${member.callsign}">-</button>
                         <button class="control-button orbit-right-button" id="orbitRight_${member.callsign}">→</button>
                         <button class="control-button delete-button" id="delete_${member.callsign}">X</button>
                     </div>
@@ -113,6 +114,10 @@ function deleteAircraft(blip) {
                 // Attach event listeners to the new buttons
                 document.getElementById(`orbitLeft_${member.callsign}`).addEventListener('click', () => {
                     processCommandForBlip(member, "OL");
+                });
+
+                document.getElementById(`stopTurn_${member.callsign}`).addEventListener('click', () => {
+                    processCommandForBlip(member, "ST");
                 });
 
                 document.getElementById(`orbitRight_${member.callsign}`).addEventListener('click', () => {
@@ -139,7 +144,7 @@ function deleteAircraft(blip) {
 function isFormationActive(formationCallsign) {
     // Find all aircraft whose callsign starts with the base callsign
     const formationMembers = aircraftBlips.filter(b => getFormationCallsign(b.callsign) === formationCallsign);
-    
+
     // If there are no formation members left, the formation is no longer active
     return formationMembers.length > 0;
 }
@@ -191,6 +196,10 @@ function promoteToLeader(newLeaderBlip, newFormationSize) {
             processCommand(newLeaderBlip, "OL");
         });
 
+        document.getElementById(`stopTurn_${newLeaderBlip.callsign}`).addEventListener('click', () => {
+            processCommand(newLeaderBlip, "ST");
+        });
+
         document.getElementById(`orbitRight_${newLeaderBlip.callsign}`).addEventListener('click', () => {
             processCommand(newLeaderBlip, "OR");
         });
@@ -208,7 +217,6 @@ function promoteToLeader(newLeaderBlip, newFormationSize) {
         console.log(`${newLeaderBlip.callsign} is now the new leader of the formation.`);
     }
 }
-
 
 // Helper function to remove aircraft elements from the DOM
 function removeAircraftElements(blip) {
@@ -252,9 +260,10 @@ function createControlBox(blip, formationSize, aircraftIndex) {
             <input type="text" id="commandInput_${blip.callsign}">
             <span id="lastCommand_${blip.callsign}" class="last-command"></span>
             ${formationSize > 1 && aircraftIndex === 1 ?
-            `<input class= "checkbox" type="checkbox" id="formationCheckbox_${blip.callsign}" checked> `:''}
-            <button class="control-button orbit-left-button" id="orbitLeft_${blip.callsign}">←</button>
-            <button class="control-button orbit-right-button" id="orbitRight_${blip.callsign}">→</button>
+            `<input class= "checkbox" type="checkbox" id="formationCheckbox_${blip.callsign}" checked> ` : ''}
+            <button class="control-button orbit-left-button" id="orbitLeft_${blip.callsign}"><i class="arrow left"></i></button>
+            <button class="control-button stop-turn-button" id="stopTurn_${blip.callsign}">—</button>
+            <button class="control-button orbit-right-button" id="orbitRight_${blip.callsign}"><i class="arrow right"></i></button>
             <button class="control-button delete-button" id="delete_${blip.callsign}">X</button>
         </div>
     `;
@@ -282,17 +291,21 @@ function createControlBox(blip, formationSize, aircraftIndex) {
     });
 
     // Event listeners for the buttons
-document.getElementById(`orbitLeft_${blip.callsign}`).addEventListener('click', () => {
-    processCommand(blip, "OL");
-});
+    document.getElementById(`orbitLeft_${blip.callsign}`).addEventListener('click', () => {
+        processCommand(blip, "OL");
+    });
 
-document.getElementById(`orbitRight_${blip.callsign}`).addEventListener('click', () => {
-    processCommand(blip, "OR");
-});
+    document.getElementById(`stopTurn_${blip.callsign}`).addEventListener('click', () => {
+        processCommand(blip, "ST");
+    });
 
-document.getElementById(`delete_${blip.callsign}`).addEventListener('click', () => {
-    processCommand(blip, "DEL");
-});
+    document.getElementById(`orbitRight_${blip.callsign}`).addEventListener('click', () => {
+        processCommand(blip, "OR");
+    });
+
+    document.getElementById(`delete_${blip.callsign}`).addEventListener('click', () => {
+        processCommand(blip, "DEL");
+    });
 }
 
 // Function to update the speed and heading in the control box
@@ -326,13 +339,35 @@ function updateControlBox(blip) {
 // Helper functions to enable or disable control boxes
 function enableControlBox(callsign) {
     const commandInput = document.getElementById(`commandInput_${callsign}`);
-    if (commandInput) commandInput.disabled = false;
+    const orbitLeft = document.getElementById(`orbitLeft_${callsign}`);
+    const orbitRight = document.getElementById(`orbitRight_${callsign}`);
+    const stopTurn = document.getElementById(`stopTurn_${callsign}`);
+    const deleteBtn = document.getElementById(`delete_${callsign}`);
+
+    if (commandInput) {
+        commandInput.disabled = false;
+        orbitLeft.disabled = false;
+        orbitRight.disabled = false;
+        stopTurn.disabled = false;
+        deleteBtn.disabled = false;
+    }
 }
 
 // Function to disable the control box
 function disableControlBox(callsign) {
     const commandInput = document.getElementById(`commandInput_${callsign}`);
-    if (commandInput) commandInput.disabled = true;
+    const orbitLeft = document.getElementById(`orbitLeft_${callsign}`);
+    const orbitRight = document.getElementById(`orbitRight_${callsign}`);
+    const stopTurn = document.getElementById(`stopTurn_${callsign}`);
+    const deleteBtn = document.getElementById(`delete_${callsign}`);
+
+    if (commandInput) {
+        commandInput.disabled = true;
+        orbitLeft.disabled = true;
+        orbitRight.disabled = true;
+        stopTurn.disabled = true;
+        deleteBtn.disabled = true;
+    }
 }
 
 //*******Function to enable dragging of labels

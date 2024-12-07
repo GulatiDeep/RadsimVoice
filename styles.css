@@ -897,57 +897,105 @@ html {
     /* Darker blue on hover */
 }
 
-/* Left and Right orbit buttons */
-.orbit-left-button,
-.orbit-right-button {
-    position: absolute;
-    bottom: 3px; /* Positioned at the bottom of the control box */
-    font-size: 15px; /* Match font size */
-    font-weight: bold; /* Bold for better visibility */
-    color: black;
-    border: 2px solid black; /* Subtle border */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer;
-}
 
 .checkbox {
     position: absolute;
     bottom: 3px; /* Positioned at the bottom of the control box */
-    right: 70px; /* To the left of the right button */
+    right: 120px; /* To the left of the right button */
 }
 
+
+/* Common styles for Orbit buttons */
+.orbit-left-button,
+.orbit-right-button,
+.stop-turn-button,
+.delete-button {
+    position: absolute;
+    bottom: 3px; /* Positioned at the bottom of the control box */
+    font-size: 14px; /* Match font size */
+    font-weight: bold; /* Bold for better visibility */
+    color: black;
+    border: 1px solid #ccc; /* Subtle border */
+    border-radius: 3px; /* Rounded corners */
+    cursor: pointer;
+    width: 28px;
+    height: 25px;
+}
+
+/* Disabled state styles */
+.orbit-left-button:disabled,
+.orbit-right-button:disabled,
+.stop-turn-button:disabled,
+.delete-button:disabled {
+    background-color: #f0f0f0; /* Light grey background */
+    color: #a0a0a0; /* Faded text color */
+    border-color: #dcdcdc; /* Light grey border */
+    cursor: not-allowed; /* Show "not allowed" cursor */
+    pointer-events: none; /* Disable pointer interactions */
+}
+
+/* Disabled state styles */
+.orbit-left-button:disabled .arrow,
+.orbit-right-button:disabled .arrow {
+    border-color: #a0a0a0; /* Faded grey color for arrow */
+}
+
+/* Hover styles */
 .orbit-left-button:hover,
-.orbit-right-button:hover {
+.orbit-right-button:hover,
+.stop-turn-button:hover,
+.delete-button:hover {
     background-color: #007bff; /* Darker blue on hover */
     color: white; /* White text on hover */
 }
 
 /* Positioning for orbit buttons */
 .orbit-left-button {
-    right: 70px; /* To the left of the right button */
+    right: 104px; /* To the left of the stop-turn button */
 }
 
 .orbit-right-button {
-    right: 35px; /* Flush with the control box edge */
+    right: 38px; /* Flush with the control box edge */
 }
 
-/* Delete button */
+.stop-turn-button {
+    right: 71px; /* Between the left and right buttons */
+}
+
+/* Specific arrow button styles */
+.arrow {
+    border: solid black;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 3px;
+    margin: auto;
+}
+
+/* Left arrow rotation */
+.left {
+    transform: rotate(135deg);
+    -webkit-transform: rotate(135deg);
+}
+
+/* Right arrow rotation */
+.right {
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+}
+
+/* Delete button styles */
 .delete-button {
-    position: absolute;
     right: 5px;
-    font-size: 15px; /* Match font size */
-    font-weight: bold;
     color: white; /* White text */
     background-color: red; /* Red for critical action */
-    border: 2px solid darkred;
-    border-radius: 5px; /* Circular button */
-    cursor: pointer;
-    bottom: 3px; /* Positioned at the bottom of the control box */
+    border: 1px solid darkred;
 }
 
+/* Delete button hover */
 .delete-button:hover {
     background-color: darkred; /* Darker red on hover */
 }
+
 
 .control-buttons-container {
     display: flex;
