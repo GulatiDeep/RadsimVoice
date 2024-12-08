@@ -87,7 +87,6 @@
                 <button id="SRAdistanceMarkers" class="control-button">SRA</button>
                 <button id="historyDots" class="control-button">History</button>
                 <button id="label" class="control-button">Label</button>
-                <button id="activateSpeech" class="control-button">Speak</button>
                 <button id="pushToTalk" class="control-button inactive">Push to Talk</button>
 
                 <div id="statusBar" class="status-bar"></div> <!-- Status bar element -->
@@ -95,19 +94,26 @@
 
         </div>
 
+
         <div id="controlPanel">
-
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <center><b><u>Aircraft Control Panel</u></b></center>
-                <button id="helpButton" class="help-button" title="Help">?</button>
+            <div class="tab" >
+                <button class="tablinks active" onclick="openCity(event, 'aircraftControlPanel')">Aircraft Control
+                            Panel</button>
+                <button class="tablinks" onclick="openCity(event, 'commandLogs')">Log</button>
+                <button id="helpButton" class="help-button" style= "position: absolute; right:5px; background-color: #007BFF; color: white; padding: 4px 8px; border-radius: 6px; cursor: pointer;" title="Help">?</button>
+            
             </div>
-
-            <!-- Control Boxes will be dynamically added here -->
-
-
-
+            
+            <div id="aircraftControlPanel" class="tabcontent" style="display: block;">
+            
+            </div>
+            
+            <div id="commandLogs" class="tabcontent">
+                <!-- All commands will be logged here-->
+            
+            </div>
         </div>
-
+    
 
         <!-- Dialog Boxes-->
         <!-- initial Aircraft Creation Dialog -->

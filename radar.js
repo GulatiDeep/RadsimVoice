@@ -103,7 +103,7 @@
         const oppositeRunway = (selectedValue + 18) % 36 || 36;
         runwayDesignation = oppositeRunway.toString().padStart(2, '0');
         //console.log(`Runway selected: Runway ${runwayDesignation}`);
-        updateStatusBar('Runway: ' + runwayDesignation);
+        updateStatusBar('→ Runway: ' + runwayDesignation);
 
         // Update the button text with the current runway designation
         changeRunwayButton.textContent = `RW ${runwayDesignation}`;
@@ -259,7 +259,7 @@
         updateTransform();
 
         aircraftBlips.forEach(blip => blip.updateBlipPosition()); // Correct blip positions
-        updateStatusBar('Reset to Center of Screen');
+        
     }
 
 
@@ -267,7 +267,7 @@
     changeRunwayButton.addEventListener('click', () => {
         isDirectionReversed = !isDirectionReversed; // Toggle the direction
         drawRunway();
-        //updateStatusBar('Runway changed to Runway: ' + runwayDesignation);
+        
     });
 
     // Set the initial state of the button (optional)
@@ -282,11 +282,11 @@
         if (areMarkersVisible) {
             SRAdistanceMarkersButton.classList.add('active');
             SRAdistanceMarkersButton.classList.remove('inactive');
-            updateStatusBar('SRA Distance Markers On');
+            updateStatusBar('→ SRA Distance Markers On');
         } else {
             SRAdistanceMarkersButton.classList.add('inactive');
             SRAdistanceMarkersButton.classList.remove('active');
-            updateStatusBar('SRA Distance Markers Off');
+            updateStatusBar('→ SRA Distance Markers Off');
         }
 
         const markers = document.querySelectorAll('.distance-marker');
@@ -478,13 +478,13 @@ radarScope.addEventListener('mousemove', (event) => {
 
         if (isPaused) {
             pauseButton.textContent = 'Resume';
-            updateStatusBar('Exercise paused.');
+            updateStatusBar('→ Exercise paused.');
             disableControlPanel();
 
             rangeRingsContainer.style.animationPlayState = 'paused'; // Stop radar rings rotation
         } else {
             pauseButton.textContent = 'Pause';
-            updateStatusBar('Exercise resumed.');
+            updateStatusBar('→ Exercise resumed.');
             enableControlPanel();
 
             rangeRingsContainer.style.animationPlayState = 'running'; // Resume radar rings rotation
@@ -556,11 +556,11 @@ function openFullscreen() {
         if (labelsVisible) {
             labelButton.classList.add('active');
             labelButton.classList.remove('inactive');
-            updateStatusBar('Labels Visible');
+            updateStatusBar('→ Labels Visible');
         } else {
             labelButton.classList.add('inactive');
             labelButton.classList.remove('active');
-            updateStatusBar('Labels Hidden');
+            updateStatusBar('→ Labels Hidden');
         }
 
         // Update visibility for all aircraft labels and lines
@@ -586,11 +586,11 @@ function openFullscreen() {
         if (historyDotsVisible) {
             historyButton.classList.add('active');
             historyButton.classList.remove('inactive');
-            updateStatusBar('History Dots Visible');
+            updateStatusBar('→ History Dots Visible');
         } else {
             historyButton.classList.add('inactive');
             historyButton.classList.remove('active');
-            updateStatusBar('History Dots Hidden');
+            updateStatusBar('→ History Dots Hidden');
         }
 
         // Immediately apply the visibility change by updating all blips

@@ -20,19 +20,40 @@ function processCommand(blip, cmd) {
             const checkbox = document.getElementById(`formationCheckbox_${blip.callsign}`);
 
             if (checkbox && checkbox.checked) {  // Propagate if checked
-                console.log(`Command received by leader C/S ${blip.callsign} for formation ${formationCallsign}. Propagating "${command}" to formation members.`);
+                
+                //Logging into console
+                console.log(`→ "${command}" command received by ${blip.callsign} for formation ${formationCallsign}.\n`);
+
+                //Logging into Command Log
+                commandLogs.innerHTML += `<br><br>→ "<b style="color: blue">${command}</b>" command received by "<b style="color: blue">${blip.callsign}</b>" for formation "<b style="color: blue">${formationCallsign}</b>". `;
+
                 propagateCommandToFormation(formationCallsign, command);
             } else {
-                console.log(`Command received by specific member: ${blip.callsign} of formation ${formationCallsign}.`);
+                //Logging into console
+                console.log(`→ "${command}" command received by ${blip.callsign}`);
+                
+                //Logging into Command Log
+                commandLogs.innerHTML += `<br><br>→ "<b style="color: blue">${command}</b>" command received by "<b style="color: blue">${blip.callsign}</b>". `;
+
                 processCommandForBlip(blip, command);  // Execute only for the leader
             }
         } else {
-            console.log(`Command received by specific member: ${blip.callsign} of formation ${formationCallsign}.`);
+            //Logging into console
+            console.log(`→ "${command}" command received by ${blip.callsign}.`);
+                
+            //Logging into Command Log
+            commandLogs.innerHTML += `<br><br>→ "<b style="color: blue">${command}</b>" command received by "<b style="color: blue">${blip.callsign}</b>". `;
+            
             processCommandForBlip(blip, command); // Execute for the specific member
         }
     } else {
         // Command is for an individual aircraft not part of any formation
-        console.log(`Command received by individual aircraft: ${blip.callsign}.`);
+        //Logging into console
+        console.log(`→ "${command}" command received by ${blip.callsign}.`);
+                
+        //Logging into Command Log
+        commandLogs.innerHTML += `<br><br>→ "<b style="color: blue">${command}</b>" command received by "<b style="color: blue">${blip.callsign}</b>". `;
+
         processCommandForBlip(blip, command);
     }
 
@@ -63,7 +84,7 @@ function processCommandForBlip(blip, command) {
     
     let isValidCommand = false; // Track whether the command is valid
 
-    console.log(`Command "${command}" being executed by C/S ${blip.callsign}.`);
+    //console.log(`Command "${command}" being executed by C/S ${blip.callsign}.`);
 
     // Handle heading command
     if (headingMatch) {
@@ -77,7 +98,7 @@ function processCommandForBlip(blip, command) {
         blip.setTargetHeading(targetHeading);
 
         const turnDirection = direction === 'L' ? 'Left' : 'Right';
-        updateStatusBar(`Aircraft ${blip.callsign} turning ${turnDirection} heading ${blip.targetHeading}°`);
+        updateStatusBar(`→ Aircraft ${blip.callsign} turning ${turnDirection} heading ${blip.targetHeading}°`);
         isValidCommand = true;
         
     }
@@ -86,7 +107,7 @@ function processCommandForBlip(blip, command) {
     else if (speedMatch) {
         const speed = parseInt(speedMatch[1], 10);
         blip.setTargetSpeed(speed);
-        updateStatusBar(`Aircraft ${blip.callsign} speed set to ${speed} knots.`);
+        updateStatusBar(`→ Aircraft ${blip.callsign} speed set to ${speed} knots.`);
         isValidCommand = true;
         
     }
@@ -95,7 +116,7 @@ function processCommandForBlip(blip, command) {
     else if (altitudeMatch) {
         const altitude = parseInt(altitudeMatch[1], 10) * 100;
         blip.targetAltitude = altitude;
-        updateStatusBar(`Aircraft ${blip.callsign} target altitude set to ${altitude} feet.`);
+        updateStatusBar(`→ Aircraft ${blip.callsign} target altitude set to ${altitude} feet.`);
         isValidCommand = true;
         
     }
@@ -104,7 +125,7 @@ function processCommandForBlip(blip, command) {
     else if (verticalRateMatch) {
         const rate = parseInt(verticalRateMatch[1], 10);
         blip.verticalClimbDescendRate = rate;
-        updateStatusBar(`Aircraft ${blip.callsign} vertical rate set to ${rate} feet per minute.`);
+        updateStatusBar(`→ Aircraft ${blip.callsign} vertical rate set to ${rate} feet per minute.`);
         isValidCommand = true;
         
     }
@@ -116,20 +137,20 @@ function processCommandForBlip(blip, command) {
         if (!['7500', '7600', '7700'].includes(newSSRCode)) {
             const existingSSR = aircraftBlips.find(b => b.ssrCode === newSSRCode);
             if (existingSSR && newSSRCode !== '0000') {
-                updateStatusBar(`Duplicate SSR code. Aircraft ${existingSSR.callsign} already squawking ${existingSSR.ssrCode}`);
+                updateStatusBar(`→ Duplicate SSR code. Aircraft ${existingSSR.callsign} already squawking ${existingSSR.ssrCode}`);
                 return;
             }
         }
 
         blip.setSSRCode(newSSRCode);
-        updateStatusBar(`Aircraft ${blip.callsign} SSR code set to 3-${newSSRCode}`);
+        updateStatusBar(`→ Aircraft ${blip.callsign} SSR code set to 3-${newSSRCode}`);
         isValidCommand = true;
     }
 
     // Handle report heading command
     else if (command === "RH") {
         const formattedHeading = String(Math.round(blip.heading) % 360).padStart(3, '0');
-        updateStatusBar(`Aircraft ${blip.callsign} heading: ${formattedHeading}°`);
+        updateStatusBar(`→ Aircraft ${blip.callsign} heading: ${formattedHeading}°`);
         isValidCommand = true;
         
     }
@@ -137,7 +158,7 @@ function processCommandForBlip(blip, command) {
     // Handle delete command
     else if (command === "DEL") {
         deleteAircraft(blip);
-        updateStatusBar(`Aircraft ${blip.callsign} deleted.`);
+        updateStatusBar(`→ Aircraft ${blip.callsign} deleted.`);
         isValidCommand = true;
 
     }
@@ -145,7 +166,7 @@ function processCommandForBlip(blip, command) {
     // Handle orbit left command
     else if (command === "OL") {
         blip.startOrbitLeft();
-        updateStatusBar(`Aircraft ${blip.callsign} orbiting left.`);
+        updateStatusBar(`→ Aircraft ${blip.callsign} orbiting left.`);
         isValidCommand = true;
         
     }
@@ -153,7 +174,7 @@ function processCommandForBlip(blip, command) {
     // Handle orbit right command
     else if (command === "OR") {
         blip.startOrbitRight();
-        updateStatusBar(`Aircraft ${blip.callsign} orbiting right.`);
+        updateStatusBar(`→ Aircraft ${blip.callsign} orbiting right.`);
         isValidCommand = true;
         
     }
@@ -162,14 +183,14 @@ function processCommandForBlip(blip, command) {
     else if (command === "ST") {
         blip.stopTurn();
         const formattedHeading = String(Math.round(blip.heading) % 360).padStart(3, '0');
-        updateStatusBar(`Aircraft ${blip.callsign} stopping turn heading: ${formattedHeading}°.`);
+        updateStatusBar(`→ Aircraft ${blip.callsign} stopping turn heading: ${formattedHeading}°.`);
         isValidCommand = true;
         
     }
 
     // Handle invalid command
     else {
-        updateStatusBar(`Invalid command: ${command}.`);
+        updateStatusBar(`→ → Invalid command: ${command}.`);
     }
 
     // Update the last command display

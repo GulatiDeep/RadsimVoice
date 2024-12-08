@@ -77,7 +77,7 @@ function deleteAircraft(blip) {
         }
     } else {
         // If deleting an individual aircraft, ensure no formation-related cleanup is required
-        console.log(`Deleting individual aircraft: ${blip.callsign}`);
+        //console.log(`Deleting individual aircraft: ${blip.callsign}`);
     }
 
     // Decrement the total aircraft count
@@ -135,7 +135,14 @@ function deleteAircraft(blip) {
     displayAircraftCounts();
 
     // Update the status bar
-    updateStatusBar(`Aircraft ${blip.callsign} deleted.`);
+    updateStatusBar(`→ ${blip.callsign} deleted.`);
+
+    //Logging into console
+        console.log(`→ ${blip.callsign} deleted.`);
+
+        //Logging into Command Log
+        commandLogs.innerHTML += `<br><br>→ "<b style="color: red">${blip.callsign}</b>" deleted. `;
+    
 }
 
 
@@ -214,7 +221,7 @@ function promoteToLeader(newLeaderBlip, newFormationSize) {
             toggleFormationControlBoxes(!checkbox.checked, newFormationSize, newLeaderBlip.callsign); // Reversed logic
         });
 
-        console.log(`${newLeaderBlip.callsign} is now the new leader of the formation.`);
+        //console.log(`${newLeaderBlip.callsign} is now the new leader of the formation.`);
     }
 }
 
@@ -235,7 +242,7 @@ function removeAircraftElements(blip) {
 //***********Functions related to Control Boxes
 // Function to Create control box for aircraft
 function createControlBox(blip, formationSize, aircraftIndex) {
-    const controlPanel = document.getElementById('controlPanel');
+    const aircraftControlPanel = document.getElementById('aircraftControlPanel');
     const controlBox = document.createElement('div');
     controlBox.className = 'control-box';
     controlBox.id = `controlBox_${blip.callsign}`;  // Unique ID based on callsign
@@ -268,7 +275,7 @@ function createControlBox(blip, formationSize, aircraftIndex) {
         </div>
     `;
 
-    controlPanel.appendChild(controlBox);
+    aircraftControlPanel.appendChild(controlBox);
 
     // Disable the control box if it's not the first aircraft in the formation
     if (formationSize > 1 && aircraftIndex > 1) {
@@ -419,6 +426,20 @@ function dragElement(elmnt, blip) {
 }
 
 
+//Functions for tabbed browsing
+function openCity(evt, cityName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
 
 
 //********functions.js script file ends here**********/

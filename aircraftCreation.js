@@ -1,5 +1,8 @@
 //************Functions related to aircraft blip, leading line and associated labels ***********/
 
+//Log display initialisation
+let commandLogs = document.getElementById('commandLogs');
+
 /********** Functions to create Initial Aircraft on Page load  *****/
 //Function to open initial dialog box for exercise settings
 function openInitialAircraftDialog() {
@@ -100,6 +103,15 @@ function createInitialAircraftBlip() {
 
         if (success) {
             closeInitialAircraftDialog();  // Close the dialog box after creating aircraft
+
+            //Logging into console
+            console.log(`→ Exercise started with total ${totalAircraftCount} aircraft as follows:\n` +
+                `${allAircraftCallsigns.map(callsign => `  - ${callsign}`).join('\n')}`);
+
+            //Logging into Command Log
+            commandLogs.innerHTML += `→ Exercise started with total ${totalAircraftCount} aircraft as follows:<br>
+            <i style="color: green">${allAircraftCallsigns.map(callsign => `&nbsp;&nbsp;&nbsp;&nbsp;- ${callsign}`).join('<br>')}</i>`;
+
         } else {
             // If any creation failed (due to duplicate callsign), don't proceed
             console.error("Error: Could not create aircraft due to duplicate callsign.");
@@ -178,6 +190,7 @@ function createManualAircraftBlip() {
 
     if (success) {
         closeAircraftCreationDialog(); // Close the dialog box after successful creation
+
     } else {
         // Log the error if creation fails
         console.error("Error: Could not create aircraft or formation due to duplicate callsign or other issue.");
@@ -212,8 +225,17 @@ function createIndividualAircraft(num, heading, position) {
         totalAircraftCount++;
 
         if (!isManualCreation) {
-            processCommandForBlip(blip, 'OR'); // Assign initial orbit
+            //processCommandForBlip(blip, 'OR'); // Assign initial orbit
+            blip.startOrbitRight();
+        } else {
+            //Logging into console
+            console.log(`→ Individual Aircraft created:\n  - ${blip.callsign}`);
+
+            //Logging into Command Log
+            commandLogs.innerHTML += `<br><br>→ Individual Aircraft created:<br>
+        <i style="color: green"> &nbsp;&nbsp;&nbsp;&nbsp;- ${blip.callsign}</i>`;
         }
+        
         createControlBox(blip, 1, 1);
     }
     displayAircraftCounts();
@@ -247,6 +269,15 @@ function createTransportAircraft(num, heading, position) {
         aircraftBlips.push(blip);
 
         totalAircraftCount++;
+
+        if (isManualCreation) {
+            //Logging into console
+            console.log(`→ Transport Aircraft created:\n  - ${blip.callsign}`);
+
+            //Logging into Command Log
+            commandLogs.innerHTML += `<br><br>→ Transport Aircraft created:<br>
+        <i style="color: green"> &nbsp;&nbsp;&nbsp;&nbsp;- ${blip.callsign}</i>`;
+        }
 
         // Create a control box for the aircraft
         createControlBox(blip, 1, 1);
@@ -292,8 +323,18 @@ function createFormationAircraft(num, formationSize, heading, position) {
             totalAircraftCount++;
             allAircraftCallsigns.push(callsign);
             if (!isManualCreation) {
-                processCommandForBlip(blip, 'OR'); // Assign initial orbit
-            }
+                //processCommandForBlip(blip, 'OR'); // Assign initial orbit
+                blip.startOrbitRight();
+            } 
+            
+        }
+
+        if (isManualCreation) {
+            //Logging into console
+            console.log(`→ Formation Aircraft created:`);
+    
+            //Logging into Command Log
+            commandLogs.innerHTML += `<br><br>→ Formation Aircraft created:`;
         }
 
         // Create control boxes for all formation members
@@ -301,8 +342,18 @@ function createFormationAircraft(num, formationSize, heading, position) {
             const callsign = `${formationCallsign}-${j}`;
             const blip = aircraftBlips.find(b => b.callsign === callsign);
             createControlBox(blip, formationSize, j);
+            if (isManualCreation) {
+                //Logging into console
+                console.log(`\n  - ${blip.callsign}`);
+        
+                //Logging into Command Log
+                commandLogs.innerHTML += `<br> <i style="color: green"> &nbsp;&nbsp;&nbsp;&nbsp;- ${blip.callsign}</i>`;
+            }
         }
+        
     }
+
+    
     displayAircraftCounts();
     return true;
 }
@@ -563,15 +614,11 @@ function getRandomSSRCode() {
 
 // Function to update aircraft counts in the display element
 function displayAircraftCounts() {
+
     const aircraftCountDisplay = document.getElementById('aircraftCountDisplay');
-    
     // Ensure the element exists before updating
     if (aircraftCountDisplay) {
         aircraftCountDisplay.innerHTML = `Total Aircraft: ${totalAircraftCount}`;
-    //     aircraftCountDisplay.innerHTML = `
-    //      <strong>Total Aircraft:</strong> ${totalAircraftCount}<br> 
-    //      ${allAircraftCallsigns.join('<br>')}`;
-    
     }
 }
 
@@ -668,6 +715,6 @@ document.getElementById('cancelInitialAircraftButton').addEventListener('click',
 document.getElementById('initialAircraftDialog').addEventListener('keypress', (event) => {
     if (event.key === 'Escape') {
         openFullscreen();
-    closeInitialAircraftDialog(); // Close the dialog when "Esc" is pressed
+        closeInitialAircraftDialog(); // Close the dialog when "Esc" is pressed
     }
 });
